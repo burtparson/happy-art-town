@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Happy Art Town</title>
+    
+    <!-- Tailwind CSS với suppress warning -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      // Suppress CDN warnings for development
+      if (typeof console !== 'undefined') {
+        const originalWarn = console.warn;
+        console.warn = function(...args) {
+          if (args[0] && args[0].includes && (
+            args[0].includes('cdn.tailwindcss.com') || 
+            args[0].includes('should not be used in production')
+          )) {
+            return; // Skip Tailwind CDN warnings
+          }
+          originalWarn.apply(console, args);
+        };
+      }
+      
+      tailwind.config = {
+        theme: {
+          extend: {}
+        }
+      }
+    </script>
+</head>
+<body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+</body>
+</html>
