@@ -362,6 +362,7 @@ const HappyArtTown = () => {
   const [selectedAgeGroup, setSelectedAgeGroup] = useState('all');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedArticle, setSelectedArticle] = useState(null);
+  const [selectedCourse, setSelectedCourse] = useState(null);
   const [courses, setCourses] = useState([]);
   const [articles, setArticles] = useState([]);
   const [settings, setSettings] = useState({});
@@ -442,7 +443,9 @@ const HappyArtTown = () => {
           id: course.id,
           title: course.title,
           ageGroup: course.age_group,
-          image: course.image_emoji,
+          image: course.image_url || course.image_emoji,
+          imageUrl: course.image_url,
+          imageEmoji: course.image_emoji,
           duration: course.duration,
           lessons: course.lessons,
           difficulty: course.difficulty,
@@ -476,7 +479,9 @@ const HappyArtTown = () => {
           id: article.id,
           title: article.title,
           category: article.category,
-          image: article.image_emoji,
+          image: article.image_url || article.image_emoji,
+          imageUrl: article.image_url,
+          imageEmoji: article.image_emoji,
           excerpt: article.excerpt,
           content: article.content,
           readTime: article.read_time,
@@ -584,22 +589,22 @@ const HappyArtTown = () => {
       transition={{ duration: 0.5 }}
     >
       <div className="max-w-6xl mx-auto flex items-center justify-between">
-        <motion.div 
-          className="flex items-center space-x-3"
+        <motion.button
+          className="flex items-center space-x-3 bg-transparent border-none p-0 cursor-pointer"
           whileHover={{ scale: 1.05 }}
+          onClick={() => {
+            setActiveSection('home');
+            setSelectedArticle(null);
+            setSelectedCourse(null);
+          }}
         >
           <div className="text-4xl">🎨</div>
           <div>
             <h1 className="text-2xl md:text-3xl font-bold text-white">
               {settings.site_name || 'Happy Art Town'}
             </h1>
-            {lastUpdated && (
-              <p className="text-xs text-white text-opacity-80">
-                Last updated: {lastUpdated.toLocaleTimeString()}
-              </p>
-            )}
           </div>
-        </motion.div>
+        </motion.button>
         
         <div className="flex items-center space-x-2 md:space-x-4">
           <motion.button
@@ -624,6 +629,7 @@ const HappyArtTown = () => {
               onClick={() => {
                 setActiveSection(id);
                 setSelectedArticle(null); // Reset selected article when changing sections
+                setSelectedCourse(null); // Reset selected course when changing sections
               }}
               className={`flex items-center space-x-2 px-4 py-2 rounded-full text-sm md:text-base font-medium transition-all ${
                 activeSection === id 
@@ -710,6 +716,155 @@ const HappyArtTown = () => {
       </div>
     </motion.div>
   );
+
+  const CourseDetailPage = () => {
+    if (!selectedCourse) return null;
+
+    return (
+      <motion.div
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: 1, x: 0 }}
+        exit={{ opacity: 0, x: -20 }}
+        transition={{ duration: 0.3 }}
+        className="space-y-6"
+      >
+        {/* Back Button */}
+        <motion.button
+          onClick={() => setSelectedCourse(null)}
+          className="flex items-center space-x-2 text-blue-600 hover:text-blue-700 font-medium"
+          whileHover={{ x: -5 }}
+        >
+          <ArrowLeft size={20} />
+          <span>Back to Courses</span>
+        </motion.button>
+
+        {/* Course Header */}
+        <motion.div 
+          className="bg-white rounded-2xl p-8 shadow-lg"
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.1 }}
+        >
+          <div className="flex items-start space-x-6 mb-6">
+            <div className="flex-shrink-0">
+              {selectedCourse.imageUrl ? (
+                <img 
+                  src={selectedCourse.imageUrl} 
+                  alt={selectedCourse.title}
+                  className="w-32 h-32 object-cover rounded-2xl shadow-lg"
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                    e.target.nextSibling.style.display = 'block';
+                  }}
+                />
+              ) : null}
+              <div className={`text-8xl ${selectedCourse.imageUrl ? 'hidden' : ''}`}>
+                {selectedCourse.imageEmoji || '🎨'}
+              </div>
+            </div>
+            <div className="flex-1">
+              <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-3">
+                {selectedCourse.title}
+              </h1>
+              <p className="text-lg text-gray-600 mb-4">
+                {selectedCourse.description}
+              </p>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                <div className="bg-blue-50 p-3 rounded-lg">
+                  <div className="flex items-center space-x-2 text-blue-600 mb-1">
+                    <Clock size={16} />
+                    <span className="font-medium">Duration</span>
+                  </div>
+                  <span className="text-gray-700">{selectedCourse.duration}</span>
+                </div>
+                <div className="bg-green-50 p-3 rounded-lg">
+                  <div className="flex items-center space-x-2 text-green-600 mb-1">
+                    <Play size={16} />
+                    <span className="font-medium">Lessons</span>
+                  </div>
+                  <span className="text-gray-700">{selectedCourse.lessons}</span>
+                </div>
+                <div className="bg-purple-50 p-3 rounded-lg">
+                  <div className="flex items-center space-x-2 text-purple-600 mb-1">
+                    <Award size={16} />
+                    <span className="font-medium">Level</span>
+                  </div>
+                  <span className="text-gray-700">{selectedCourse.difficulty}</span>
+                </div>
+                <div className="bg-pink-50 p-3 rounded-lg">
+                  <div className="flex items-center space-x-2 text-pink-600 mb-1">
+                    <Users size={16} />
+                    <span className="font-medium">Age Group</span>
+                  </div>
+                  <span className="text-gray-700">{selectedCourse.ageGroup} years</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+        </motion.div>
+
+        {/* Course Content */}
+        <motion.div 
+          className="bg-white rounded-2xl p-8 shadow-lg"
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.2 }}
+        >
+          <h2 className="text-2xl font-bold text-gray-800 mb-6">Description</h2>
+          <p className="text-gray-700 leading-relaxed text-lg">
+            {selectedCourse.description}
+          </p>
+        </motion.div>
+
+        {/* Related Courses */}
+        <motion.div 
+          className="bg-gray-50 rounded-2xl p-6"
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.3 }}
+        >
+          <h3 className="text-xl font-bold text-gray-800 mb-4">More Courses You Might Like</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {courses
+              .filter(course => course.id !== selectedCourse.id && course.ageGroup === selectedCourse.ageGroup)
+              .slice(0, 3)
+              .map((course) => (
+                <motion.div
+                  key={course.id}
+                  className="bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition-all cursor-pointer"
+                  whileHover={{ y: -2 }}
+                  onClick={() => setSelectedCourse(course)}
+                >
+                  <div className="flex items-center space-x-3 mb-3">
+                    <div className="flex-shrink-0">
+                      {course.imageUrl ? (
+                        <img 
+                          src={course.imageUrl} 
+                          alt={course.title}
+                          className="w-12 h-12 object-cover rounded-lg shadow-sm"
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                            e.target.nextSibling.style.display = 'block';
+                          }}
+                        />
+                      ) : null}
+                      <div className={`text-2xl ${course.imageUrl ? 'hidden' : ''}`}>
+                        {course.imageEmoji || '🎨'}
+                      </div>
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-gray-800">{course.title}</h4>
+                      <p className="text-sm text-gray-500">{course.duration} • {course.lessons} lessons</p>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+          </div>
+        </motion.div>
+      </motion.div>
+    );
+  };
 
   const ArticleDetailPage = () => {
     if (!selectedArticle) return null;
@@ -842,25 +997,45 @@ const HappyArtTown = () => {
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.1 }}
         >
-          <div className="flex items-start space-x-6 mb-6">
-            <div className="text-6xl">{selectedArticle.image}</div>
-            <div className="flex-1">
-              <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-3">
-                {selectedArticle.title}
-              </h1>
-              <p className="text-lg text-gray-600 mb-4">
-                {selectedArticle.excerpt}
-              </p>
-              <div className="flex items-center space-x-6 text-sm text-gray-500">
-                <span className="flex items-center space-x-1">
-                  <Clock size={16} />
-                  <span>{selectedArticle.readTime}</span>
-                </span>
-                <span className="bg-green-100 text-green-600 px-3 py-1 rounded-full capitalize">
-                  {selectedArticle.category}
-                </span>
-                <span>{selectedArticle.date}</span>
-              </div>
+          {/* Article Image Banner */}
+        <div className="w-full h-64 mb-6 relative overflow-hidden rounded-2xl">
+          {selectedArticle.imageUrl ? (
+            <img 
+              src={selectedArticle.imageUrl} 
+              alt={selectedArticle.title}
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                e.target.style.display = 'none';
+                e.target.nextSibling.style.display = 'flex';
+              }}
+            />
+          ) : null}
+          <div className={`w-full h-full bg-gradient-to-br from-green-100 to-blue-100 ${selectedArticle.imageUrl ? 'hidden' : 'flex'} items-center justify-center`}>
+            <div className="text-8xl">
+              {selectedArticle.imageEmoji || '📝'}
+            </div>
+          </div>
+          <div className="absolute inset-0 bg-black bg-opacity-20"></div>
+          <div className="absolute bottom-6 left-6 text-white">
+            <span className="bg-green-500 text-white px-3 py-1 rounded-full text-sm font-medium capitalize">
+              {selectedArticle.category}
+            </span>
+          </div>
+        </div>
+
+        <div className="mb-6">
+            <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-3">
+              {selectedArticle.title}
+            </h1>
+            <p className="text-lg text-gray-600 mb-4">
+              {selectedArticle.excerpt}
+            </p>
+            <div className="flex items-center space-x-6 text-sm text-gray-500">
+              <span className="flex items-center space-x-1">
+                <Clock size={16} />
+                <span>{selectedArticle.readTime}</span>
+              </span>
+              <span>{selectedArticle.date}</span>
             </div>
           </div>
         </motion.div>
@@ -897,7 +1072,22 @@ const HappyArtTown = () => {
                   onClick={() => setSelectedArticle(article)}
                 >
                   <div className="flex items-center space-x-3">
-                    <div className="text-2xl">{article.image}</div>
+                    <div className="flex-shrink-0">
+                      {article.imageUrl ? (
+                        <img 
+                          src={article.imageUrl} 
+                          alt={article.title}
+                          className="w-8 h-8 object-cover rounded-md shadow-sm"
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                            e.target.nextSibling.style.display = 'block';
+                          }}
+                        />
+                      ) : null}
+                      <div className={`text-2xl ${article.imageUrl ? 'hidden' : ''}`}>
+                        {article.imageEmoji || '📝'}
+                      </div>
+                    </div>
                     <div>
                       <h4 className="font-medium text-gray-800">{article.title}</h4>
                       <p className="text-sm text-gray-500">{article.readTime}</p>
@@ -967,71 +1157,6 @@ const HappyArtTown = () => {
 
       {loading ? <LoadingSpinner /> : (
         <>
-          {/* Featured Courses */}
-          <motion.section variants={fadeInUp}>
-            <div className="flex items-center justify-between mb-8">
-              <h3 className="text-2xl md:text-3xl font-bold text-gray-800 flex items-center">
-                <BookOpen className="mr-3 text-blue-500" />
-                Popular Courses
-                <span className="ml-3 bg-blue-100 text-blue-600 px-2 py-1 rounded-full text-sm">
-                  {courses.length}
-                </span>
-              </h3>
-              <motion.button
-                onClick={() => setActiveSection('courses')}
-                className="text-blue-500 hover:text-blue-600 flex items-center font-medium"
-                whileHover={{ x: 5 }}
-              >
-                View All <ChevronRight size={20} />
-              </motion.button>
-            </div>
-            
-            <motion.div 
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-              variants={staggerContainer}
-            >
-              {courses.slice(0, 3).map((course) => (
-                <motion.div
-                  key={course.id}
-                  className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all border-2 border-transparent hover:border-purple-200"
-                  variants={fadeInUp}
-                  whileHover={{ y: -5 }}
-                >
-                  <div className="text-4xl mb-4 text-center">{course.image}</div>
-                  <h4 className="text-xl font-bold text-gray-800 mb-2">{course.title}</h4>
-                  <p className="text-gray-600 mb-4">{course.description}</p>
-                  <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
-                    <span className="flex items-center">
-                      <Clock size={14} className="mr-1" />
-                      {course.duration}
-                    </span>
-                    <span className="bg-purple-100 text-purple-600 px-2 py-1 rounded-full">
-                      {course.ageGroup} years
-                    </span>
-                  </div>
-                  <motion.button
-                    className="w-full bg-gradient-to-r from-purple-400 to-pink-400 text-white py-3 rounded-xl font-medium"
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    Start Learning! 🎨
-                  </motion.button>
-                </motion.div>
-              ))}
-            </motion.div>
-            
-            {courses.length === 0 && !loading && (
-              <motion.div 
-                className="text-center py-12 bg-gray-50 rounded-2xl"
-                variants={fadeInUp}
-              >
-                <BookOpen size={48} className="mx-auto text-gray-400 mb-4" />
-                <h4 className="text-lg font-medium text-gray-600 mb-2">No courses available</h4>
-                <p className="text-gray-500">Check back later or create some in the admin panel!</p>
-              </motion.div>
-            )}
-          </motion.section>
-
           {/* Latest Articles */}
           <motion.section variants={fadeInUp}>
             <div className="flex items-center justify-between mb-8">
@@ -1063,7 +1188,22 @@ const HappyArtTown = () => {
                   whileHover={{ y: -3 }}
                 >
                   <div className="flex items-start space-x-4">
-                    <div className="text-3xl">{article.image}</div>
+                    <div className="flex-shrink-0">
+                      {article.imageUrl ? (
+                        <img 
+                          src={article.imageUrl} 
+                          alt={article.title}
+                          className="w-12 h-12 object-cover rounded-lg shadow-md"
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                            e.target.nextSibling.style.display = 'block';
+                          }}
+                        />
+                      ) : null}
+                      <div className={`text-3xl ${article.imageUrl ? 'hidden' : ''}`}>
+                        {article.imageEmoji || '📝'}
+                      </div>
+                    </div>
                     <div className="flex-1">
                       <h4 className="text-lg font-bold text-gray-800 mb-2">{article.title}</h4>
                       <p className="text-gray-600 mb-3">{article.excerpt}</p>
@@ -1084,6 +1224,87 @@ const HappyArtTown = () => {
               >
                 <FileText size={48} className="mx-auto text-gray-400 mb-4" />
                 <h4 className="text-lg font-medium text-gray-600 mb-2">No articles available</h4>
+                <p className="text-gray-500">Check back later or create some in the admin panel!</p>
+              </motion.div>
+            )}
+          </motion.section>
+
+          {/* Popular Courses */}
+          <motion.section variants={fadeInUp}>
+            <div className="flex items-center justify-between mb-8">
+              <h3 className="text-2xl md:text-3xl font-bold text-gray-800 flex items-center">
+                <BookOpen className="mr-3 text-blue-500" />
+                Popular Courses
+                <span className="ml-3 bg-blue-100 text-blue-600 px-2 py-1 rounded-full text-sm">
+                  {courses.length}
+                </span>
+              </h3>
+              <motion.button
+                onClick={() => setActiveSection('courses')}
+                className="text-blue-500 hover:text-blue-600 flex items-center font-medium"
+                whileHover={{ x: 5 }}
+              >
+                View All <ChevronRight size={20} />
+              </motion.button>
+            </div>
+            
+            <motion.div 
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+              variants={staggerContainer}
+            >
+              {courses.slice(0, 3).map((course) => (
+                <motion.div
+                  key={course.id}
+                  className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all border-2 border-transparent hover:border-purple-200 flex flex-col h-full"
+                  variants={fadeInUp}
+                  whileHover={{ y: -5 }}
+                >
+                  <div className="mb-4 text-center h-20 flex items-center justify-center">
+                    {course.imageUrl ? (
+                      <img 
+                        src={course.imageUrl} 
+                        alt={course.title}
+                        className="w-20 h-20 object-cover rounded-full shadow-lg"
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                          e.target.nextSibling.style.display = 'block';
+                        }}
+                      />
+                    ) : null}
+                    <div className={`text-4xl ${course.imageUrl ? 'hidden' : ''}`}>
+                      {course.imageEmoji || '🎨'}
+                    </div>
+                  </div>
+                  <h4 className="text-xl font-bold text-gray-800 mb-2">{course.title}</h4>
+                  <p className="text-gray-600 mb-4 flex-1">{course.description}</p>
+                  <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
+                    <span className="flex items-center">
+                      <Clock size={14} className="mr-1" />
+                      {course.duration}
+                    </span>
+                    <span className="bg-purple-100 text-purple-600 px-2 py-1 rounded-full">
+                      {course.ageGroup} years
+                    </span>
+                  </div>
+                  <motion.button
+                    className="w-full bg-gradient-to-r from-purple-400 to-pink-400 text-white py-3 rounded-xl font-medium mt-auto"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => setSelectedCourse(course)}
+                  >
+                    View Course
+                  </motion.button>
+                </motion.div>
+              ))}
+            </motion.div>
+            
+            {courses.length === 0 && !loading && (
+              <motion.div 
+                className="text-center py-12 bg-gray-50 rounded-2xl"
+                variants={fadeInUp}
+              >
+                <BookOpen size={48} className="mx-auto text-gray-400 mb-4" />
+                <h4 className="text-lg font-medium text-gray-600 mb-2">No courses available</h4>
                 <p className="text-gray-500">Check back later or create some in the admin panel!</p>
               </motion.div>
             )}
@@ -1141,14 +1362,29 @@ const HappyArtTown = () => {
           {filteredCourses.map((course) => (
             <motion.div
               key={course.id}
-              className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all border-2 border-transparent hover:border-blue-200"
+              className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all border-2 border-transparent hover:border-blue-200 flex flex-col h-full"
               variants={fadeInUp}
               whileHover={{ y: -5 }}
               layout
             >
-              <div className="text-5xl mb-4 text-center">{course.image}</div>
+              <div className="mb-4 text-center h-24 flex items-center justify-center">
+                {course.imageUrl ? (
+                  <img 
+                    src={course.imageUrl} 
+                    alt={course.title}
+                    className="w-24 h-24 object-cover rounded-full shadow-lg"
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                      e.target.nextSibling.style.display = 'block';
+                    }}
+                  />
+                ) : null}
+                <div className={`text-5xl ${course.imageUrl ? 'hidden' : ''}`}>
+                  {course.imageEmoji || '🎨'}
+                </div>
+              </div>
               <h3 className="text-xl font-bold text-gray-800 mb-2">{course.title}</h3>
-              <p className="text-gray-600 mb-4">{course.description}</p>
+              <p className="text-gray-600 mb-4 flex-1">{course.description}</p>
               
               <div className="space-y-2 mb-4">
                 <div className="flex items-center justify-between text-sm">
@@ -1186,12 +1422,13 @@ const HappyArtTown = () => {
               </div>
               
               <motion.button
-                className="w-full bg-gradient-to-r from-blue-400 to-purple-400 text-white py-3 rounded-xl font-medium flex items-center justify-center"
+                className="w-full bg-gradient-to-r from-blue-400 to-purple-400 text-white py-3 rounded-xl font-medium flex items-center justify-center mt-auto"
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
+                onClick={() => setSelectedCourse(course)}
               >
                 <Play size={18} className="mr-2" />
-                Start Course
+                View Course
               </motion.button>
             </motion.div>
           ))}
@@ -1253,43 +1490,64 @@ const HappyArtTown = () => {
 
       {loading ? <LoadingSpinner /> : (
         <motion.div 
-          className="grid grid-cols-1 md:grid-cols-2 gap-6"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
           variants={staggerContainer}
         >
           {filteredArticles.map((article) => (
             <motion.div
               key={article.id}
-              className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all border-2 border-transparent hover:border-green-200"
+              className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all border-2 border-transparent hover:border-green-200 flex flex-col h-full"
               variants={fadeInUp}
               whileHover={{ y: -3 }}
               layout
             >
-              <div className="flex items-start space-x-4 mb-4">
-                <div className="text-4xl flex-shrink-0">{article.image}</div>
-                <div className="flex-1">
-                  <h3 className="text-xl font-bold text-gray-800 mb-2">{article.title}</h3>
-                  <p className="text-gray-600 mb-3">{article.excerpt}</p>
-                  <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
-                    <span className="bg-gray-100 px-2 py-1 rounded-full text-xs capitalize">
-                      {article.category}
-                    </span>
-                    <div className="flex items-center space-x-4">
-                      <span>{article.readTime}</span>
-                      <span>{article.date}</span>
-                    </div>
-                  </div>
+              {/* Article Image */}
+              <div className="w-full h-48 mb-4 flex items-center justify-center bg-gradient-to-br from-green-50 to-blue-50 rounded-t-2xl">
+                {article.imageUrl ? (
+                  <img 
+                    src={article.imageUrl} 
+                    alt={article.title}
+                    className="w-full h-full object-cover rounded-t-2xl"
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                      e.target.nextSibling.style.display = 'flex';
+                    }}
+                  />
+                ) : null}
+                <div className={`text-6xl ${article.imageUrl ? 'hidden' : 'flex'} items-center justify-center h-full w-full`}>
+                  {article.imageEmoji || '📝'}
                 </div>
               </div>
-              
-              <motion.button
-                className="w-full bg-gradient-to-r from-green-400 to-blue-400 text-white py-3 rounded-xl font-medium flex items-center justify-center"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => setSelectedArticle(article)}
-              >
-                <FileText size={18} className="mr-2" />
-                Read Article
-              </motion.button>
+
+              {/* Article Content */}
+              <div className="p-6 flex-1 flex flex-col">
+                <div className="mb-3">
+                  <span className="bg-green-100 text-green-600 px-3 py-1 rounded-full text-xs capitalize font-medium">
+                    {article.category}
+                  </span>
+                </div>
+                
+                <h3 className="text-xl font-bold text-gray-800 mb-3 line-clamp-2">{article.title}</h3>
+                <p className="text-gray-600 mb-4 line-clamp-3 flex-1">{article.excerpt}</p>
+                
+                <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
+                  <span className="flex items-center">
+                    <Clock size={14} className="mr-1" />
+                    {article.readTime}
+                  </span>
+                  <span>{article.date}</span>
+                </div>
+                
+                <motion.button
+                  className="w-full bg-gradient-to-r from-green-400 to-blue-400 text-white py-3 rounded-xl font-medium flex items-center justify-center mt-auto"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => setSelectedArticle(article)}
+                >
+                  <FileText size={18} className="mr-2" />
+                  View Article
+                </motion.button>
+              </div>
             </motion.div>
           ))}
         </motion.div>
@@ -1314,6 +1572,10 @@ const HappyArtTown = () => {
       return <ArticleDetailPage />;
     }
     
+    if (activeSection === 'courses' && selectedCourse) {
+      return <CourseDetailPage />;
+    }
+    
     switch (activeSection) {
       case 'home':
         return <HomePage />;
@@ -1333,7 +1595,7 @@ const HappyArtTown = () => {
       <main className="max-w-6xl mx-auto px-4 py-8">
         <AnimatePresence mode="wait">
           <motion.div
-            key={activeSection + (selectedArticle ? `-${selectedArticle.id}` : '')}
+            key={activeSection + (selectedArticle ? `-article-${selectedArticle.id}` : '') + (selectedCourse ? `-course-${selectedCourse.id}` : '')}
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}

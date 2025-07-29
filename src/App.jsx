@@ -1,19 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Plus, Edit3, Trash2, Save, X, Eye, EyeOff, BookOpen, FileText, 
-  Settings, Users, BarChart3, Search, Filter, Calendar, Clock,
-  Award, Play, Sparkles, Home, LogOut, RefreshCw, AlertCircle,
-  CheckCircle, Upload, ImageIcon
-} from 'lucide-react';
+import { Palette, Brush, Star, Trophy, Heart, BookOpen, Users, Camera, Sparkles, Home, PaintBucket, FileText, ChevronRight, Play, Clock, Award, RefreshCw, AlertCircle, ArrowLeft } from 'lucide-react';
 
-// Real Supabase client setup
+// Real Supabase client setup - UNCOMMENT when you have credentials
+// To use real Supabase:
+// 1. Install: npm install @supabase/supabase-js
+// 2. Create .env file with your Supabase credentials
+// 3. Uncomment the lines below:
+
 import { createClient } from '@supabase/supabase-js'
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
-// Mock data for fallback
+// Mock settings data that simulates Supabase structure
+const mockSettingsData = [
+  { key: 'site_name', value: 'Happy Art Town', description: 'Name of the website' },
+  { key: 'site_description', value: 'Where creativity comes alive! Join thousands of young artists learning to draw, paint, and create amazing art!', description: 'Website description' },
+  { key: 'contact_email', value: 'admin@happyarttown.com', description: 'Contact email for the site' },
+  { key: 'max_courses_per_user', value: '10', description: 'Maximum courses a user can create' }
+];
+
+// Mock data that simulates Supabase structure
 const mockCoursesData = [
   {
     id: 1,
@@ -21,7 +29,6 @@ const mockCoursesData = [
     description: "Learn to draw beautiful rainbows with simple steps!",
     age_group: "2-4",
     image_emoji: "🌈",
-    image_url: null,
     duration: "15 mins",
     lessons: 5,
     difficulty: "Beginner",
@@ -34,7 +41,6 @@ const mockCoursesData = [
     description: "Draw cute animals step by step with fun techniques!",
     age_group: "5-8",
     image_emoji: "🐱",
-    image_url: null,
     duration: "20 mins",
     lessons: 8,
     difficulty: "Easy",
@@ -43,16 +49,51 @@ const mockCoursesData = [
   },
   {
     id: 3,
-    title: "Space Art Adventure",
-    description: "Create amazing space-themed artwork!",
+    title: "Superhero Comics",
+    description: "Create your own superhero comics and stories!",
     age_group: "9-12",
-    image_emoji: "🚀",
-    image_url: null,
+    image_emoji: "🦸",
     duration: "30 mins",
     lessons: 12,
     difficulty: "Intermediate",
-    is_published: false,
+    is_published: true,
     created_at: "2024-01-13T10:00:00Z"
+  },
+  {
+    id: 4,
+    title: "Magic Landscapes",
+    description: "Paint magical castles and fairy tale worlds!",
+    age_group: "5-8",
+    image_emoji: "🏰",
+    duration: "25 mins",
+    lessons: 10,
+    difficulty: "Easy",
+    is_published: true,
+    created_at: "2024-01-12T10:00:00Z"
+  },
+  {
+    id: 5,
+    title: "Ocean Adventures",
+    description: "Explore underwater worlds through art!",
+    age_group: "2-4",
+    image_emoji: "🐠",
+    duration: "12 mins",
+    lessons: 6,
+    difficulty: "Beginner",
+    is_published: true,
+    created_at: "2024-01-11T10:00:00Z"
+  },
+  {
+    id: 6,
+    title: "Space Exploration",
+    description: "Draw planets, rockets, and alien worlds!",
+    age_group: "9-12",
+    image_emoji: "🚀",
+    duration: "35 mins",
+    lessons: 15,
+    difficulty: "Advanced",
+    is_published: true,
+    created_at: "2024-01-10T10:00:00Z"
   }
 ];
 
@@ -61,10 +102,35 @@ const mockArticlesData = [
     id: 1,
     title: "5 Fun Color Mixing Tips",
     excerpt: "Discover amazing color combinations that will make your art pop!",
-    content: "Here are some amazing tips for mixing colors...",
+    content: `# 5 Fun Color Mixing Tips
+
+Color mixing is one of the most exciting parts of creating art! Here are some amazing tips that will help you create beautiful colors in your artwork.
+
+## 1. Start with Primary Colors
+The three primary colors are red, blue, and yellow. These are special because you can't make them by mixing other colors together! But you can use them to make almost any other color you want.
+
+## 2. Make Secondary Colors
+When you mix two primary colors together, you get secondary colors:
+- Red + Blue = Purple 💜
+- Blue + Yellow = Green 💚  
+- Yellow + Red = Orange 🧡
+
+## 3. Create Earth Colors
+Mix a tiny bit of the opposite color to make natural earth tones:
+- Add a little green to red to make brown
+- Add a little orange to blue to make gray
+- Add a little purple to yellow to make olive
+
+## 4. Warm and Cool Colors
+- Warm colors (red, orange, yellow) make things feel cozy and sunny ☀️
+- Cool colors (blue, green, purple) make things feel calm and peaceful 🌙
+
+## 5. Practice Makes Perfect!
+The best way to learn color mixing is to experiment! Try mixing different amounts of colors and see what happens. Keep a color mixing chart to remember your favorite combinations.
+
+Remember: There are no mistakes in art, only happy accidents! Have fun exploring colors! 🎨`,
     category: "tips",
     image_emoji: "🎨",
-    image_url: null,
     read_time: "3 min read",
     is_published: true,
     created_at: "2024-01-15T10:00:00Z"
@@ -73,55 +139,240 @@ const mockArticlesData = [
     id: 2,
     title: "Drawing Your Pet",
     excerpt: "Step-by-step guide to drawing your furry friends!",
-    content: "Follow these steps to draw your beloved pet...",
+    content: `# Drawing Your Pet
+
+Drawing your beloved pet can be one of the most rewarding art projects! Whether you have a dog, cat, hamster, or any other furry friend, here's how to capture their personality on paper.
+
+## Getting Started
+
+### What You'll Need:
+- Paper (any kind works!)
+- Pencils (regular school pencils are perfect)
+- Eraser
+- Your pet (or a good photo)
+
+## Step 1: Basic Shapes
+Start by looking at your pet and imagining them as simple shapes:
+- Head might be a circle or oval
+- Body could be an oval or rectangle
+- Legs are like cylinders or rectangles
+
+Don't worry about details yet - just get the basic shape down!
+
+## Step 2: Add the Features
+Now add the important features:
+- Eyes (usually two circles or ovals)
+- Nose (often a triangle or heart shape)
+- Mouth
+- Ears (triangle or oval shapes)
+
+## Step 3: Fur and Texture
+Make your pet look fluffy by:
+- Drawing short, quick strokes for short fur
+- Using longer, curved lines for long fur
+- Adding darker areas where shadows would be
+
+## Step 4: Details That Matter
+What makes your pet special?
+- Unique markings or spots
+- The way their ears sit
+- Their favorite sleeping position
+- That special look in their eyes
+
+## Pro Tips:
+- Start light with your pencil - you can always make lines darker
+- Take breaks and look at your drawing from far away
+- If something doesn't look right, that's okay! Keep practicing
+- Your pet loves you no matter how the drawing turns out! 🐕💕
+
+Remember: The goal isn't to make a perfect copy, but to capture what makes your pet special to you!`,
     category: "tutorials",
     image_emoji: "🐕",
-    image_url: null,
     read_time: "5 min read",
     is_published: true,
     created_at: "2024-01-14T10:00:00Z"
   },
   {
     id: 3,
-    title: "Art Inspiration from Nature",
-    excerpt: "Find inspiration in the world around you!",
-    content: "Nature provides endless inspiration for young artists...",
+    title: "Famous Kid Artists",
+    excerpt: "Meet amazing young artists from around the world!",
+    content: `# Famous Kid Artists
+
+Did you know that some of the world's most amazing artists started creating when they were kids just like you? Let's meet some incredible young artists who prove that age is just a number when it comes to creativity!
+
+## Kieron Williamson - The "Mini Monet"
+At just 7 years old, Kieron from England became famous for his beautiful landscape paintings. His artwork sells for thousands of dollars! He started painting when he was 5 and fell in love with capturing the beauty of nature.
+
+**What we can learn:** It's never too early to start following your passion!
+
+## Autumn de Forest
+Autumn started painting when she was just 5 years old. By age 8, she was already having art exhibitions! She's known for her colorful, expressive paintings and has even painted portraits of famous people.
+
+**What we can learn:** Don't be afraid to experiment with bright, bold colors!
+
+## Akiane Kramarik
+Akiane began drawing and painting at age 4. She's famous for her incredibly detailed and spiritual artwork. She taught herself to paint and became internationally known as a teenager.
+
+**What we can learn:** You can teach yourself amazing skills with practice and dedication!
+
+## Danie Nevins
+This young artist from South Africa creates stunning wildlife paintings. She started painting animals when she was very young and uses her art to help protect endangered species.
+
+**What we can learn:** Art can be used to help make the world a better place!
+
+## Tips from Young Artists:
+
+### 1. Practice Every Day
+Even 15 minutes of drawing or painting helps you improve!
+
+### 2. Don't Compare Yourself
+Your art is unique and special - don't worry about what others are doing.
+
+### 3. Experiment Freely
+Try new materials, colors, and techniques. Some of the best discoveries happen by accident!
+
+### 4. Share Your Work
+Show your art to family and friends. Their encouragement will help you grow!
+
+### 5. Have Fun!
+The most important thing is to enjoy creating. When you have fun, it shows in your artwork! ✨
+
+Remember: Every famous artist was once a beginner. What matters most is that you keep creating and never give up on your dreams! 🌟`,
     category: "inspiration",
-    image_emoji: "🍃",
-    image_url: null,
+    image_emoji: "⭐",
     read_time: "4 min read",
-    is_published: false,
+    is_published: true,
     created_at: "2024-01-13T10:00:00Z"
+  },
+  {
+    id: 4,
+    title: "Make Art with Nature",
+    excerpt: "Use leaves, flowers, and stones to create beautiful art!",
+    content: `# Make Art with Nature
+
+Nature is full of amazing art supplies just waiting to be discovered! Let's explore how you can create beautiful artwork using things you can find outside.
+
+## Nature's Art Supply Store
+
+### Leaves 🍃
+- Different shapes and sizes for templates
+- Beautiful colors, especially in fall
+- Great for printing and stamping
+- Can be arranged into patterns
+
+### Flowers and Petals 🌸
+- Natural paintbrushes
+- Beautiful colors for dyes
+- Can be pressed and dried
+- Perfect for collages
+
+### Stones and Rocks 🪨
+- Smooth surfaces for painting
+- Different shapes inspire creativity
+- Can be arranged into sculptures
+- Great for making patterns
+
+### Sticks and Twigs 🌿
+- Natural drawing tools
+- Can be bundled into brushes
+- Perfect for sculptures
+- Great for making frames
+
+## Fun Nature Art Projects
+
+### 1. Leaf Printing
+- Place a leaf under paper
+- Rub gently with a crayon
+- Watch the leaf pattern appear!
+- Try different leaf shapes
+
+### 2. Stone Painting
+- Find smooth, flat stones
+- Clean them with water
+- Paint them with fun designs
+- Turn them into story stones!
+
+### 3. Nature Collages
+- Collect different materials
+- Arrange them on paper
+- Glue them down carefully
+- Create scenes or abstract designs
+
+### 4. Flower Pressing
+- Pick fresh flowers
+- Place between heavy books
+- Wait a few weeks
+- Use in art projects!
+
+### 5. Sand and Dirt Art
+- Different colored soils make natural paints
+- Mix with a little water
+- Paint on rocks or paper
+- Creates earthy, natural colors
+
+## Nature Art Tips
+
+### Be Respectful
+- Only take what you need
+- Don't damage living plants
+- Leave natural areas better than you found them
+- Ask permission if on private property
+
+### Safety First
+- Wash hands after collecting materials
+- Check for bugs or thorns
+- Avoid poisonous plants
+- Have an adult help with tools
+
+### Preservation
+- Some natural art won't last forever - that's okay!
+- Take photos of temporary creations
+- Spray finished pieces with fixative (adults only)
+- Store pressed flowers properly
+
+### Get Creative!
+- Combine natural materials with regular art supplies
+- Make nature journals
+- Create seasonal collections
+- Start a nature art club with friends!
+
+## The Best Part About Nature Art
+
+Creating with natural materials connects us to the world around us. Every leaf, stone, and flower is unique - just like your artwork will be! Plus, you're recycling materials that would otherwise just go back to the earth.
+
+Nature art teaches us to:
+- Observe details in the world around us
+- Appreciate natural beauty
+- Work with what we have
+- Respect our environment
+
+So grab a basket, head outside, and see what amazing art supplies nature has waiting for you today! 🌱🎨
+
+*Remember: The best nature art comes from your imagination and creativity, not from copying others!*`,
+    category: "tips",
+    image_emoji: "🍃",
+    read_time: "6 min read",
+    is_published: true,
+    created_at: "2024-01-12T10:00:00Z"
   }
 ];
 
-const mockSettingsData = {
-  site_name: 'Happy Art Town',
-  site_description: 'Where creativity comes alive! Join thousands of young artists learning to draw, paint, and create amazing art!',
-  contact_email: 'admin@happyarttown.com',
-  max_courses_per_user: '10'
-};
-
-const AdminTool = () => {
-  const [activeTab, setActiveTab] = useState('dashboard');
+const HappyArtTown = () => {
+  const [activeSection, setActiveSection] = useState('home');
+  const [selectedAgeGroup, setSelectedAgeGroup] = useState('all');
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedArticle, setSelectedArticle] = useState(null);
+  const [selectedCourse, setSelectedCourse] = useState(null);
   const [courses, setCourses] = useState([]);
   const [articles, setArticles] = useState([]);
   const [settings, setSettings] = useState({});
-  const [loading, setLoading] = useState(false);
-  const [editingItem, setEditingItem] = useState(null);
-  const [showForm, setShowForm] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterStatus, setFilterStatus] = useState('all');
-  const [notification, setNotification] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [lastUpdated, setLastUpdated] = useState(null);
-  const [usingMockData, setUsingMockData] = useState(false);
-  const [settingsLoading, setSettingsLoading] = useState(false);
 
   // Load data from Supabase on component mount
   useEffect(() => {
     loadData();
-    loadSettings();
   }, []);
 
   const loadData = async () => {
@@ -131,491 +382,195 @@ const AdminTool = () => {
     try {
       console.log('🔄 Loading data from Supabase...');
 
-      // Check if we have valid Supabase credentials
-      if (!supabaseUrl || !supabaseAnonKey) {
-        throw new Error('Supabase credentials not found');
-      }
+      // Load settings from Supabase
+      const { data: settingsData, error: settingsError } = await supabase
+        .from('settings')
+        .select('*');
 
-      // Load courses from Supabase
+      // Load published courses from Supabase
       const { data: coursesData, error: coursesError } = await supabase
         .from('courses')
         .select('*')
+        .eq('is_published', true)
         .order('created_at', { ascending: false });
 
-      // Load articles from Supabase  
+      // Load published articles from Supabase  
       const { data: articlesData, error: articlesError } = await supabase
         .from('articles')
         .select('*')
+        .eq('is_published', true)
         .order('created_at', { ascending: false });
+
+      // Handle settings data
+      if (settingsError) {
+        console.error('❌ Error loading settings:', settingsError);
+        // Fall back to mock settings data
+        console.log('📦 Using mock settings data');
+        const mockSettingsObject = {};
+        mockSettingsData.forEach(setting => {
+          mockSettingsObject[setting.key] = setting.value;
+        });
+        setSettings(mockSettingsObject);
+      } else {
+        console.log('✅ Raw settings data:', settingsData);
+        // Transform settings array into object for easy access
+        const settingsObject = {};
+        (settingsData || []).forEach(setting => {
+          settingsObject[setting.key] = setting.value;
+        });
+        setSettings(settingsObject);
+      }
 
       if (coursesError) {
         console.error('❌ Error loading courses:', coursesError);
-        throw coursesError;
+        // Fall back to mock data
+        console.log('📦 Using mock courses data');
+        setCourses(mockCoursesData.map(course => ({
+          id: course.id,
+          title: course.title,
+          ageGroup: course.age_group,
+          image: course.image_emoji,
+          duration: course.duration,
+          lessons: course.lessons,
+          difficulty: course.difficulty,
+          description: course.description,
+          created_at: course.created_at
+        })));
+      } else {
+        console.log('✅ Raw courses data:', coursesData);
+        // Transform Supabase data to match component structure
+        const transformedCourses = (coursesData || []).map(course => ({
+          id: course.id,
+          title: course.title,
+          ageGroup: course.age_group,
+          image: course.image_url || course.image_emoji,
+          imageUrl: course.image_url,
+          imageEmoji: course.image_emoji,
+          duration: course.duration,
+          lessons: course.lessons,
+          difficulty: course.difficulty,
+          description: course.description,
+          created_at: course.created_at
+        }));
+        setCourses(transformedCourses);
       }
 
       if (articlesError) {
         console.error('❌ Error loading articles:', articlesError);
-        throw articlesError;
+        // Fall back to mock data
+        console.log('📦 Using mock articles data');
+        setArticles(mockArticlesData.map(article => ({
+          id: article.id,
+          title: article.title,
+          category: article.category,
+          image: article.image_emoji,
+          excerpt: article.excerpt,
+          content: article.content,
+          readTime: article.read_time,
+          date: new Date(article.created_at).toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric'
+          }),
+          created_at: article.created_at
+        })));
+      } else {
+        console.log('✅ Raw articles data:', articlesData);
+        const transformedArticles = (articlesData || []).map(article => ({
+          id: article.id,
+          title: article.title,
+          category: article.category,
+          image: article.image_url || article.image_emoji,
+          imageUrl: article.image_url,
+          imageEmoji: article.image_emoji,
+          excerpt: article.excerpt,
+          content: article.content,
+          readTime: article.read_time,
+          date: new Date(article.created_at).toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric'
+          }),
+          created_at: article.created_at
+        }));
+        setArticles(transformedArticles);
       }
 
-      console.log('✅ Courses data:', coursesData);
-      console.log('✅ Articles data:', articlesData);
-      
-      setCourses(coursesData || []);
-      setArticles(articlesData || []);
-      setUsingMockData(false);
       setLastUpdated(new Date());
       console.log('🎉 Data loading completed!');
       
     } catch (err) {
       console.error('💥 Error loading data:', err);
-      setError(`Database connection failed: ${err.message}`);
+      setError(err.message);
       
       // Fall back to mock data on any error
       console.log('📦 Using mock data due to error');
-      setCourses(mockCoursesData);
-      setArticles(mockArticlesData);
-      setUsingMockData(true);
+      
+      // Settings fallback
+      const mockSettingsObject = {};
+      mockSettingsData.forEach(setting => {
+        mockSettingsObject[setting.key] = setting.value;
+      });
+      setSettings(mockSettingsObject);
+      
+      setCourses(mockCoursesData.map(course => ({
+        id: course.id,
+        title: course.title,
+        ageGroup: course.age_group,
+        image: course.image_emoji,
+        duration: course.duration,
+        lessons: course.lessons,
+        difficulty: course.difficulty,
+        description: course.description,
+        created_at: course.created_at
+      })));
+      
+      setArticles(mockArticlesData.map(article => ({
+        id: article.id,
+        title: article.title,
+        category: article.category,
+        image: article.image_emoji,
+        excerpt: article.excerpt,
+        content: article.content,
+        readTime: article.read_time,
+        date: new Date(article.created_at).toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric'
+        }),
+        created_at: article.created_at
+      })));
+      
       setLastUpdated(new Date());
     } finally {
       setLoading(false);
     }
   };
 
-  const loadSettings = async () => {
-    setSettingsLoading(true);
-    
-    try {
-      console.log('🔄 Loading settings from Supabase...');
+  const ageGroups = [
+    { value: 'all', label: 'All Ages', icon: '👶' },
+    { value: '2-4', label: '2-4 Years', icon: '🧸' },
+    { value: '5-8', label: '5-8 Years', icon: '🎈' },
+    { value: '9-12', label: '9-12 Years', icon: '🎭' }
+  ];
 
-      // Check if we have valid Supabase credentials
-      if (!supabaseUrl || !supabaseAnonKey) {
-        throw new Error('Supabase credentials not found');
-      }
+  const categories = [
+    { value: 'all', label: 'All Topics', icon: '📚' },
+    { value: 'tips', label: 'Drawing Tips', icon: '💡' },
+    { value: 'tutorials', label: 'Tutorials', icon: '📖' },
+    { value: 'inspiration', label: 'Inspiration', icon: '✨' }
+  ];
 
-      const { data: settingsData, error: settingsError } = await supabase
-        .from('settings')
-        .select('*');
+  const filteredCourses = selectedAgeGroup === 'all' 
+    ? courses 
+    : courses.filter(course => course.ageGroup === selectedAgeGroup);
 
-      if (settingsError) {
-        console.error('❌ Error loading settings:', settingsError);
-        throw settingsError;
-      }
-
-      console.log('✅ Settings data:', settingsData);
-      
-      // Convert array of settings to object
-      const settingsObj = {};
-      if (settingsData) {
-        settingsData.forEach(setting => {
-          settingsObj[setting.key] = setting.value;
-        });
-      }
-      
-      setSettings(settingsObj);
-      console.log('🎉 Settings loading completed!');
-      
-    } catch (err) {
-      console.error('💥 Error loading settings:', err);
-      
-      // Fall back to mock settings on any error
-      console.log('📦 Using mock settings due to error');
-      setSettings(mockSettingsData);
-    } finally {
-      setSettingsLoading(false);
-    }
-  };
-
-  // Upload image to Supabase Storage
-  const uploadImage = async (file, bucket = 'images') => {
-    try {
-      console.log('📤 Uploading image:', file.name);
-      
-      if (usingMockData) {
-        // Mock upload - return a fake URL
-        const mockUrl = `https://via.placeholder.com/400x300?text=${encodeURIComponent(file.name)}`;
-        console.log('📦 Mock upload returning:', mockUrl);
-        return mockUrl;
-      }
-
-      // Generate unique filename
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-      const filePath = `${bucket}/${fileName}`;
-
-      console.log('📤 Uploading to Supabase Storage:', filePath);
-
-      // Upload file to Supabase Storage
-      const { data, error } = await supabase.storage
-        .from(bucket)
-        .upload(filePath, file, {
-          cacheControl: '3600',
-          upsert: false
-        });
-
-      if (error) {
-        console.error('❌ Upload error:', error);
-        throw error;
-      }
-
-      console.log('✅ Upload successful:', data);
-
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from(bucket)
-        .getPublicUrl(filePath);
-
-      console.log('🔗 Public URL:', publicUrl);
-      return publicUrl;
-
-    } catch (error) {
-      console.error('💥 Upload failed:', error);
-      throw error;
-    }
-  };
-
-  const saveSettings = async (newSettings) => {
-    setSettingsLoading(true);
-    
-    try {
-      console.log('💾 Saving settings to Supabase...', newSettings);
-
-      if (usingMockData) {
-        // Mock data behavior
-        setSettings(newSettings);
-        showNotification('Settings saved successfully! (Mock data)');
-        return;
-      }
-
-      // Check if we have valid Supabase credentials
-      if (!supabaseUrl || !supabaseAnonKey) {
-        throw new Error('Supabase credentials not found');
-      }
-
-      // Update each setting individually
-      for (const [key, value] of Object.entries(newSettings)) {
-        console.log(`🔄 Updating setting: ${key} = ${value}`);
-        
-        const { error } = await supabase
-          .from('settings')
-          .upsert({ 
-            key: key, 
-            value: value,
-            updated_at: new Date().toISOString()
-          }, { 
-            onConflict: 'key' 
-          });
-
-        if (error) {
-          console.error(`❌ Error updating setting ${key}:`, error);
-          throw error;
-        }
-      }
-
-      console.log('✅ All settings saved successfully');
-      setSettings(newSettings);
-      showNotification('Settings saved successfully!');
-      
-    } catch (err) {
-      console.error('💥 Error saving settings:', err);
-      showNotification('Error saving settings: ' + err.message, 'error');
-    } finally {
-      setSettingsLoading(false);
-    }
-  };
-
-  const showNotification = (message, type = 'success') => {
-    setNotification({ message, type });
-    setTimeout(() => setNotification(null), 3000);
-  };
-
-  const handlePublishToggle = async (item, type) => {
-    if (usingMockData) {
-      // Mock data behavior
-      if (type === 'course') {
-        setCourses(prev => prev.map(c => 
-          c.id === item.id ? { ...c, is_published: !c.is_published } : c
-        ));
-      } else {
-        setArticles(prev => prev.map(a => 
-          a.id === item.id ? { ...a, is_published: !a.is_published } : a
-        ));
-      }
-      showNotification(
-        `${type} ${item.is_published ? 'unpublished' : 'published'} successfully! (Mock data)`
-      );
-      return;
-    }
-
-    setLoading(true);
-    try {
-      console.log(`🔄 Toggling publish status for ${type} ID: ${item.id}`);
-      
-      const tableName = type === 'course' ? 'courses' : 'articles';
-      const newStatus = !item.is_published;
-      
-      const { data, error } = await supabase
-        .from(tableName)
-        .update({ 
-          is_published: newStatus,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', item.id)
-        .select();
-
-      if (error) {
-        console.error('❌ Error updating status:', error);
-        throw error;
-      }
-
-      console.log('✅ Status updated:', data);
-
-      // Update local state
-      if (type === 'course') {
-        setCourses(prev => prev.map(c => 
-          c.id === item.id ? { ...c, is_published: newStatus } : c
-        ));
-      } else {
-        setArticles(prev => prev.map(a => 
-          a.id === item.id ? { ...a, is_published: newStatus } : a
-        ));
-      }
-
-      showNotification(
-        `${type} ${item.is_published ? 'unpublished' : 'published'} successfully!`
-      );
-    } catch (error) {
-      console.error('💥 Error updating status:', error);
-      showNotification('Error updating status: ' + error.message, 'error');
-    }
-    setLoading(false);
-  };
-
-  const handleDelete = async (id, type) => {
-    if (!window.confirm(`Are you sure you want to delete this ${type}?`)) return;
-    
-    if (usingMockData) {
-      // Mock data behavior
-      if (type === 'course') {
-        setCourses(prev => prev.filter(c => c.id !== id));
-      } else {
-        setArticles(prev => prev.filter(a => a.id !== id));
-      }
-      showNotification(`${type} deleted successfully! (Mock data)`);
-      return;
-    }
-    
-    setLoading(true);
-    try {
-      console.log(`🗑️ Deleting ${type} ID: ${id}`);
-      
-      const tableName = type === 'course' ? 'courses' : 'articles';
-      
-      const { error } = await supabase
-        .from(tableName)
-        .delete()
-        .eq('id', id);
-
-      if (error) {
-        console.error('❌ Error deleting:', error);
-        throw error;
-      }
-
-      console.log('✅ Successfully deleted');
-
-      // Update local state
-      if (type === 'course') {
-        setCourses(prev => prev.filter(c => c.id !== id));
-      } else {
-        setArticles(prev => prev.filter(a => a.id !== id));
-      }
-
-      showNotification(`${type} deleted successfully!`);
-    } catch (error) {
-      console.error('💥 Error deleting:', error);
-      showNotification('Error deleting item: ' + error.message, 'error');
-    }
-    setLoading(false);
-  };
-
-  const handleSave = async (formData, type) => {
-    console.log(`💾 Starting save operation for ${type}:`, formData);
-    setLoading(true);
-    
-    try {
-      if (editingItem) {
-        // Update existing item
-        console.log(`🔄 Updating existing ${type} with ID:`, editingItem.id);
-        
-        if (usingMockData) {
-          // Mock data behavior
-          console.log('📦 Mock update:', type, editingItem.id, 'with data:', formData);
-          
-          if (type === 'course') {
-            setCourses(prev => prev.map(c => 
-              c.id === editingItem.id ? { ...c, ...formData, updated_at: new Date().toISOString() } : c
-            ));
-          } else {
-            setArticles(prev => prev.map(a => 
-              a.id === editingItem.id ? { ...a, ...formData, updated_at: new Date().toISOString() } : a
-            ));
-          }
-          showNotification(`${type} updated successfully! (Mock data)`);
-        } else {
-          // Real Supabase update
-          const tableName = type === 'course' ? 'courses' : 'articles';
-          
-          const updateData = {
-            ...formData,
-            updated_at: new Date().toISOString()
-          };
-          
-          console.log(`🔄 Sending update to Supabase table "${tableName}":`, updateData);
-          
-          const { data, error } = await supabase
-            .from(tableName)
-            .update(updateData)
-            .eq('id', editingItem.id)
-            .select();
-
-          if (error) {
-            console.error('❌ Supabase update error:', error);
-            throw error;
-          }
-
-          console.log('✅ Supabase update success:', data);
-
-          // Update local state with returned data
-          if (data && data.length > 0) {
-            const updatedItem = data[0];
-            if (type === 'course') {
-              setCourses(prev => prev.map(c => 
-                c.id === editingItem.id ? updatedItem : c
-              ));
-            } else {
-              setArticles(prev => prev.map(a => 
-                a.id === editingItem.id ? updatedItem : a
-              ));
-            }
-          }
-          showNotification(`${type} updated successfully!`);
-        }
-        
-      } else {
-        // Create new item
-        console.log(`➕ Creating new ${type}`);
-        
-        if (usingMockData) {
-          // Mock data behavior
-          const newItem = { 
-            ...formData, 
-            id: Date.now(), 
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-            is_published: false 
-          };
-          
-          console.log('📦 Mock create new', type, 'with data:', newItem);
-          
-          if (type === 'course') {
-            setCourses(prev => [newItem, ...prev]);
-          } else {
-            setArticles(prev => [newItem, ...prev]);
-          }
-          showNotification(`${type} created successfully! (Mock data)`);
-        } else {
-          // Real Supabase insert
-          const tableName = type === 'course' ? 'courses' : 'articles';
-          
-          const insertData = {
-            ...formData,
-            is_published: false,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          };
-
-          console.log(`➕ Sending insert to Supabase table "${tableName}":`, insertData);
-
-          const { data, error } = await supabase
-            .from(tableName)
-            .insert([insertData])
-            .select();
-
-          if (error) {
-            console.error('❌ Supabase insert error:', error);
-            throw error;
-          }
-
-          console.log('✅ Supabase insert success:', data);
-
-          if (data && data.length > 0) {
-            const newItem = data[0];
-            if (type === 'course') {
-              setCourses(prev => [newItem, ...prev]);
-            } else {
-              setArticles(prev => [newItem, ...prev]);
-            }
-          }
-          showNotification(`${type} created successfully!`);
-        }
-      }
-
-      // Close form and reset state
-      console.log('✅ Save operation completed, closing form');
-      setShowForm(false);
-      setEditingItem(null);
-      
-    } catch (error) {
-      console.error('💥 Save operation failed:', error);
-      
-      // Show detailed error message
-      let errorMessage = 'Error saving item: ';
-      if (error.message) {
-        errorMessage += error.message;
-      } else if (error.details) {
-        errorMessage += error.details;
-      } else {
-        errorMessage += 'Unknown error occurred';
-      }
-      
-      showNotification(errorMessage, 'error');
-      
-      // Don't close the form on error so user can try again
-      console.log('❌ Keeping form open due to error');
-    } finally {
-      setLoading(false);
-      console.log('🏁 Save operation ended');
-    }
-  };
-
-  const filteredCourses = courses.filter(course => {
-    const matchesSearch = course.title.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFilter = filterStatus === 'all' || 
-      (filterStatus === 'published' && course.is_published) ||
-      (filterStatus === 'draft' && !course.is_published);
-    return matchesSearch && matchesFilter;
-  });
-
-  const filteredArticles = articles.filter(article => {
-    const matchesSearch = article.title.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFilter = filterStatus === 'all' || 
-      (filterStatus === 'published' && article.is_published) ||
-      (filterStatus === 'draft' && !article.is_published);
-    return matchesSearch && matchesFilter;
-  });
-
-  const stats = {
-    totalCourses: courses.length,
-    publishedCourses: courses.filter(c => c.is_published).length,
-    totalArticles: articles.length,
-    publishedArticles: articles.filter(a => a.is_published).length
-  };
+  const filteredArticles = selectedCategory === 'all'
+    ? articles
+    : articles.filter(article => article.category === selectedCategory);
 
   // Animation variants
   const fadeInUp = {
     initial: { opacity: 0, y: 20 },
     animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.3 }
+    transition: { duration: 0.6 }
   };
 
   const staggerContainer = {
@@ -626,201 +581,71 @@ const AdminTool = () => {
     }
   };
 
-  const Notification = () => {
-    if (!notification) return null;
-
-    return (
-      <motion.div
-        initial={{ opacity: 0, y: -100 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -100 }}
-        className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg flex items-center space-x-3 ${
-          notification.type === 'error' 
-            ? 'bg-red-500 text-white' 
-            : 'bg-green-500 text-white'
-        }`}
-      >
-        {notification.type === 'error' ? (
-          <AlertCircle size={20} />
-        ) : (
-          <CheckCircle size={20} />
-        )}
-        <span>{notification.message}</span>
-      </motion.div>
-    );
-  };
-
-  const ErrorDisplay = () => {
-    if (!error) return null;
-    
-    return (
-      <motion.div 
-        className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6"
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-      >
-        <div className="flex items-center space-x-3">
-          <AlertCircle className="w-5 h-5 text-yellow-500" />
-          <div>
-            <h4 className="font-medium text-yellow-800">Database Connection Issue</h4>
-            <p className="text-sm text-yellow-600 mt-1">{error}</p>
-            <p className="text-sm text-blue-600 mt-1">
-              {usingMockData ? 'Using mock data for demonstration' : 'Some features may be limited'}
-            </p>
-            <button 
-              onClick={loadData}
-              className="mt-2 text-sm text-yellow-700 underline hover:text-yellow-800"
-            >
-              Try reconnecting
-            </button>
-          </div>
-        </div>
-      </motion.div>
-    );
-  };
-
-  const DataStatus = () => (
-    <motion.div 
-      className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6"
-      initial={{ opacity: 0, y: -10 }}
-      animate={{ opacity: 1, y: 0 }}
-    >
-      <div className="flex items-center space-x-3">
-        <div className={`w-3 h-3 rounded-full animate-pulse ${
-          usingMockData ? 'bg-yellow-400' : 'bg-green-400'
-        }`}></div>
-        <div className="text-sm">
-          <span className="font-medium text-blue-800">Data Source:</span>
-          <span className="text-blue-600 ml-2">
-            {usingMockData ? 'Mock Data' : 'Live from Supabase'} • 
-            {courses.length} courses • {articles.length} articles
-          </span>
-          {lastUpdated && (
-            <span className="text-blue-500 ml-2">
-              • Updated: {lastUpdated.toLocaleTimeString()}
-            </span>
-          )}
-        </div>
-      </div>
-    </motion.div>
-  );
-
-  const Sidebar = () => (
-    <motion.div 
-      className="bg-white shadow-lg w-64 min-h-screen fixed left-0 top-0 z-50"
-      initial={{ x: -100, opacity: 0 }}
-      animate={{ x: 0, opacity: 1 }}
+  const Navigation = () => (
+    <motion.nav 
+      className="bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 p-4 shadow-lg"
+      initial={{ y: -100 }}
+      animate={{ y: 0 }}
       transition={{ duration: 0.5 }}
     >
-      <div className="p-6">
-        <div className="flex items-center space-x-3 mb-8">
-          <div className="text-3xl">🎨</div>
+      <div className="max-w-6xl mx-auto flex items-center justify-between">
+        <motion.button
+          className="flex items-center space-x-3 bg-transparent border-none p-0 cursor-pointer"
+          whileHover={{ scale: 1.05 }}
+          onClick={() => {
+            setActiveSection('home');
+            setSelectedArticle(null);
+            setSelectedCourse(null);
+          }}
+        >
+          <div className="text-4xl">🎨</div>
           <div>
-            <h1 className="text-xl font-bold text-gray-800">{settings.site_name || 'Happy Art'}</h1>
-            <p className="text-sm text-gray-500">Admin Panel</p>
+            <h1 className="text-2xl md:text-3xl font-bold text-white">
+              {settings.site_name || 'Happy Art Town'}
+            </h1>
           </div>
-        </div>
+        </motion.button>
         
-        <nav className="space-y-2">
+        <div className="flex items-center space-x-2 md:space-x-4">
+          <motion.button
+            onClick={loadData}
+            className="flex items-center space-x-2 px-3 py-2 bg-white bg-opacity-20 text-white rounded-lg text-sm hover:bg-opacity-30 transition-all"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            disabled={loading}
+            title="Refresh content from database"
+          >
+            <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+            <span className="hidden md:inline">{loading ? 'Loading...' : 'Refresh'}</span>
+          </motion.button>
+          
           {[
-            { id: 'dashboard', icon: BarChart3, label: 'Dashboard' },
+            { id: 'home', icon: Home, label: 'Home' },
             { id: 'courses', icon: BookOpen, label: 'Courses' },
-            { id: 'articles', icon: FileText, label: 'Articles' },
-            { id: 'settings', icon: Settings, label: 'Settings' }
+            { id: 'articles', icon: FileText, label: 'Articles' }
           ].map(({ id, icon: Icon, label }) => (
             <motion.button
               key={id}
-              onClick={() => setActiveTab(id)}
-              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-all ${
-                activeTab === id 
-                  ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg' 
-                  : 'text-gray-600 hover:bg-gray-100'
+              onClick={() => {
+                setActiveSection(id);
+                setSelectedArticle(null); // Reset selected article when changing sections
+                setSelectedCourse(null); // Reset selected course when changing sections
+              }}
+              className={`flex items-center space-x-2 px-4 py-2 rounded-full text-sm md:text-base font-medium transition-all ${
+                activeSection === id 
+                  ? 'bg-white text-purple-600 shadow-lg' 
+                  : 'text-white hover:bg-white hover:bg-opacity-20'
               }`}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
-              <Icon size={20} />
-              <span className="font-medium">{label}</span>
+              <Icon size={18} />
+              <span className="hidden md:inline">{label}</span>
             </motion.button>
           ))}
-        </nav>
-      </div>
-    </motion.div>
-  );
-
-  const Header = () => (
-    <motion.div 
-      className="bg-white shadow-sm border-b p-4 ml-64 relative z-10"
-      initial={{ opacity: 0, y: -20 }}
-      animate={{ opacity: 1, y: 0 }}
-    >
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-800 capitalize">{activeTab}</h2>
-          <p className="text-gray-500">Manage your art learning content</p>
-        </div>
-        
-        <div className="flex items-center space-x-4">
-          <motion.button
-            onClick={activeTab === 'settings' ? () => { loadData(); loadSettings(); } : loadData}
-            className="flex items-center space-x-2 px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg"
-            whileHover={{ scale: 1.02 }}
-            disabled={loading || settingsLoading}
-            title="Refresh data from database"
-          >
-            <RefreshCw size={18} className={(loading || settingsLoading) ? 'animate-spin' : ''} />
-            <span className="hidden md:inline">
-              {(loading || settingsLoading) ? 'Loading...' : 'Refresh'}
-            </span>
-          </motion.button>
-          
-          {(activeTab === 'courses' || activeTab === 'articles') && (
-            <motion.button
-              onClick={() => {
-                setEditingItem(null);
-                setShowForm(true);
-              }}
-              className="flex items-center space-x-2 px-6 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg font-medium"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <Plus size={18} />
-              <span>Add {activeTab.slice(0, -1)}</span>
-            </motion.button>
-          )}
         </div>
       </div>
-    </motion.div>
-  );
-
-  const FilterBar = () => (
-    <motion.div 
-      className="bg-white p-4 rounded-lg shadow-sm border mb-6"
-      variants={fadeInUp}
-    >
-      <div className="flex flex-col md:flex-row gap-4">
-        <div className="flex-1 relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
-          <input
-            type="text"
-            placeholder="Search..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-          />
-        </div>
-        
-        <select
-          value={filterStatus}
-          onChange={(e) => setFilterStatus(e.target.value)}
-          className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-        >
-          <option value="all">All Status</option>
-          <option value="published">Published</option>
-          <option value="draft">Draft</option>
-        </select>
-      </div>
-    </motion.div>
+    </motion.nav>
   );
 
   const LoadingSpinner = () => (
@@ -843,1347 +668,976 @@ const AdminTool = () => {
           }}
         />
         <div className="text-center">
-          <p className="text-lg font-medium text-gray-700">Loading data...</p>
-          <p className="text-sm text-gray-500">
-            {usingMockData ? 'Using mock data' : 'Fetching from database'}
-          </p>
+          <p className="text-lg font-medium text-gray-700">Loading from database...</p>
+          <p className="text-sm text-gray-500">Fetching latest content</p>
         </div>
       </div>
     </motion.div>
   );
 
-  const Dashboard = () => (
-    <motion.div
-      initial="initial"
-      animate="animate"
-      variants={staggerContainer}
-      className="space-y-6"
+  const ErrorDisplay = () => (
+    <motion.div 
+      className="bg-red-50 border border-red-200 rounded-lg p-6 mb-6"
+      initial={{ opacity: 0, y: -10 }}
+      animate={{ opacity: 1, y: 0 }}
     >
-      <ErrorDisplay />
-      <DataStatus />
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {[
-          { title: 'Total Courses', value: stats.totalCourses, icon: BookOpen, color: 'bg-blue-500', change: '+12%' },
-          { title: 'Published Courses', value: stats.publishedCourses, icon: Eye, color: 'bg-green-500', change: '+5%' },
-          { title: 'Total Articles', value: stats.totalArticles, icon: FileText, color: 'bg-purple-500', change: '+8%' },
-          { title: 'Published Articles', value: stats.publishedArticles, icon: Eye, color: 'bg-pink-500', change: '+3%' }
-        ].map((stat, index) => (
-          <motion.div
-            key={index}
-            className="bg-white p-6 rounded-xl shadow-lg border border-gray-100"
-            variants={fadeInUp}
-            whileHover={{ y: -5, shadow: "0 10px 25px rgba(0,0,0,0.1)" }}
+      <div className="flex items-center space-x-3">
+        <AlertCircle className="w-6 h-6 text-red-500" />
+        <div>
+          <h3 className="font-medium text-red-800">Database Connection Error</h3>
+          <p className="text-sm text-red-600 mt-1">{error}</p>
+          <p className="text-sm text-blue-600 mt-1">Using mock data for demonstration</p>
+          <button 
+            onClick={loadData}
+            className="mt-2 text-sm text-red-700 underline hover:text-red-800"
           >
-            <div className="flex items-center justify-between mb-4">
-              <div className={`${stat.color} p-3 rounded-lg`}>
-                <stat.icon className="text-white" size={24} />
-              </div>
-              <span className="text-green-500 text-sm font-medium">{stat.change}</span>
-            </div>
-            <h3 className="text-2xl font-bold text-gray-800">{stat.value}</h3>
-            <p className="text-gray-500 text-sm">{stat.title}</p>
-          </motion.div>
-        ))}
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <motion.div variants={fadeInUp} className="bg-white p-6 rounded-xl shadow-lg">
-          <h3 className="text-xl font-bold text-gray-800 mb-4">Recent Courses</h3>
-          <div className="space-y-3">
-            {courses.slice(0, 5).map((course, index) => (
-              <div key={index} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                <div className="w-12 h-12 flex items-center justify-center">
-                  {course.image_url ? (
-                    <img 
-                      src={course.image_url} 
-                      alt={course.title}
-                      className="w-10 h-10 rounded-lg object-cover"
-                    />
-                  ) : (
-                    <div className="text-2xl">{course.image_emoji}</div>
-                  )}
-                </div>
-                <div className="flex-1">
-                  <p className="font-medium text-gray-800">{course.title}</p>
-                  <p className="text-sm text-gray-500">Ages {course.age_group} • {course.difficulty}</p>
-                </div>
-                <div className={`px-2 py-1 rounded-full text-xs font-medium ${
-                  course.is_published ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-600'
-                }`}>
-                  {course.is_published ? 'Published' : 'Draft'}
-                </div>
-              </div>
-            ))}
-          </div>
-        </motion.div>
-
-        <motion.div variants={fadeInUp} className="bg-white p-6 rounded-xl shadow-lg">
-          <h3 className="text-xl font-bold text-gray-800 mb-4">Recent Articles</h3>
-          <div className="space-y-3">
-            {articles.slice(0, 5).map((article, index) => (
-              <div key={index} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                <div className="w-12 h-12 flex items-center justify-center">
-                  {article.image_url ? (
-                    <img 
-                      src={article.image_url} 
-                      alt={article.title}
-                      className="w-10 h-10 rounded-lg object-cover"
-                    />
-                  ) : (
-                    <div className="text-2xl">{article.image_emoji}</div>
-                  )}
-                </div>
-                <div className="flex-1">
-                  <p className="font-medium text-gray-800">{article.title}</p>
-                  <p className="text-sm text-gray-500 capitalize">{article.category} • {article.read_time}</p>
-                </div>
-                <div className={`px-2 py-1 rounded-full text-xs font-medium ${
-                  article.is_published ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-600'
-                }`}>
-                  {article.is_published ? 'Published' : 'Draft'}
-                </div>
-              </div>
-            ))}
-          </div>
-        </motion.div>
+            Try again
+          </button>
+        </div>
       </div>
     </motion.div>
   );
 
-  const CoursesList = () => (
+  const DataStatus = () => (
+    <motion.div 
+      className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6"
+      initial={{ opacity: 0, y: -10 }}
+      animate={{ opacity: 1, y: 0 }}
+    >
+      <div className="flex items-center space-x-3">
+        <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+        <div className="text-sm">
+          <span className="font-medium text-blue-800">Data Status:</span>
+          <span className="text-blue-600 ml-2">
+            {courses.length} courses • {articles.length} articles • {Object.keys(settings).length} settings
+          </span>
+          {error && <span className="text-red-600 ml-2">(using mock data)</span>}
+        </div>
+      </div>
+    </motion.div>
+  );
+
+  const CourseDetailPage = () => {
+    if (!selectedCourse) return null;
+
+    return (
+      <motion.div
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: 1, x: 0 }}
+        exit={{ opacity: 0, x: -20 }}
+        transition={{ duration: 0.3 }}
+        className="space-y-6"
+      >
+        {/* Back Button */}
+        <motion.button
+          onClick={() => setSelectedCourse(null)}
+          className="flex items-center space-x-2 text-blue-600 hover:text-blue-700 font-medium"
+          whileHover={{ x: -5 }}
+        >
+          <ArrowLeft size={20} />
+          <span>Back to Courses</span>
+        </motion.button>
+
+        {/* Course Header */}
+        <motion.div 
+          className="bg-white rounded-2xl p-8 shadow-lg"
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.1 }}
+        >
+          <div className="flex items-start space-x-6 mb-6">
+            <div className="flex-shrink-0">
+              {selectedCourse.imageUrl ? (
+                <img 
+                  src={selectedCourse.imageUrl} 
+                  alt={selectedCourse.title}
+                  className="w-32 h-32 object-cover rounded-2xl shadow-lg"
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                    e.target.nextSibling.style.display = 'block';
+                  }}
+                />
+              ) : null}
+              <div className={`text-8xl ${selectedCourse.imageUrl ? 'hidden' : ''}`}>
+                {selectedCourse.imageEmoji || '🎨'}
+              </div>
+            </div>
+            <div className="flex-1">
+              <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-3">
+                {selectedCourse.title}
+              </h1>
+              <p className="text-lg text-gray-600 mb-4">
+                {selectedCourse.description}
+              </p>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                <div className="bg-blue-50 p-3 rounded-lg">
+                  <div className="flex items-center space-x-2 text-blue-600 mb-1">
+                    <Clock size={16} />
+                    <span className="font-medium">Duration</span>
+                  </div>
+                  <span className="text-gray-700">{selectedCourse.duration}</span>
+                </div>
+                <div className="bg-green-50 p-3 rounded-lg">
+                  <div className="flex items-center space-x-2 text-green-600 mb-1">
+                    <Play size={16} />
+                    <span className="font-medium">Lessons</span>
+                  </div>
+                  <span className="text-gray-700">{selectedCourse.lessons}</span>
+                </div>
+                <div className="bg-purple-50 p-3 rounded-lg">
+                  <div className="flex items-center space-x-2 text-purple-600 mb-1">
+                    <Award size={16} />
+                    <span className="font-medium">Level</span>
+                  </div>
+                  <span className="text-gray-700">{selectedCourse.difficulty}</span>
+                </div>
+                <div className="bg-pink-50 p-3 rounded-lg">
+                  <div className="flex items-center space-x-2 text-pink-600 mb-1">
+                    <Users size={16} />
+                    <span className="font-medium">Age Group</span>
+                  </div>
+                  <span className="text-gray-700">{selectedCourse.ageGroup} years</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+        </motion.div>
+
+        {/* Course Content */}
+        <motion.div 
+          className="bg-white rounded-2xl p-8 shadow-lg"
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.2 }}
+        >
+          <h2 className="text-2xl font-bold text-gray-800 mb-6">Description</h2>
+          <p className="text-gray-700 leading-relaxed text-lg">
+            {selectedCourse.description}
+          </p>
+        </motion.div>
+
+        {/* Related Courses */}
+        <motion.div 
+          className="bg-gray-50 rounded-2xl p-6"
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.3 }}
+        >
+          <h3 className="text-xl font-bold text-gray-800 mb-4">More Courses You Might Like</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {courses
+              .filter(course => course.id !== selectedCourse.id && course.ageGroup === selectedCourse.ageGroup)
+              .slice(0, 3)
+              .map((course) => (
+                <motion.div
+                  key={course.id}
+                  className="bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition-all cursor-pointer"
+                  whileHover={{ y: -2 }}
+                  onClick={() => setSelectedCourse(course)}
+                >
+                  <div className="flex items-center space-x-3 mb-3">
+                    <div className="flex-shrink-0">
+                      {course.imageUrl ? (
+                        <img 
+                          src={course.imageUrl} 
+                          alt={course.title}
+                          className="w-12 h-12 object-cover rounded-lg shadow-sm"
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                            e.target.nextSibling.style.display = 'block';
+                          }}
+                        />
+                      ) : null}
+                      <div className={`text-2xl ${course.imageUrl ? 'hidden' : ''}`}>
+                        {course.imageEmoji || '🎨'}
+                      </div>
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-gray-800">{course.title}</h4>
+                      <p className="text-sm text-gray-500">{course.duration} • {course.lessons} lessons</p>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+          </div>
+        </motion.div>
+      </motion.div>
+    );
+  };
+
+  const ArticleDetailPage = () => {
+    if (!selectedArticle) return null;
+
+    // Function to render markdown-like content
+    const renderContent = (content) => {
+      const lines = content.split('\n');
+      const elements = [];
+      let currentParagraph = [];
+      
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i].trim();
+        
+        if (line.startsWith('# ')) {
+          if (currentParagraph.length > 0) {
+            elements.push(
+              <p key={`p-${elements.length}`} className="text-gray-700 leading-relaxed mb-4">
+                {currentParagraph.join(' ')}
+              </p>
+            );
+            currentParagraph = [];
+          }
+          elements.push(
+            <h1 key={`h1-${elements.length}`} className="text-3xl font-bold text-gray-800 mb-6 mt-8 first:mt-0">
+              {line.substring(2)}
+            </h1>
+          );
+        } else if (line.startsWith('## ')) {
+          if (currentParagraph.length > 0) {
+            elements.push(
+              <p key={`p-${elements.length}`} className="text-gray-700 leading-relaxed mb-4">
+                {currentParagraph.join(' ')}
+              </p>
+            );
+            currentParagraph = [];
+          }
+          elements.push(
+            <h2 key={`h2-${elements.length}`} className="text-2xl font-bold text-gray-800 mb-4 mt-6">
+              {line.substring(3)}
+            </h2>
+          );
+        } else if (line.startsWith('### ')) {
+          if (currentParagraph.length > 0) {
+            elements.push(
+              <p key={`p-${elements.length}`} className="text-gray-700 leading-relaxed mb-4">
+                {currentParagraph.join(' ')}
+              </p>
+            );
+            currentParagraph = [];
+          }
+          elements.push(
+            <h3 key={`h3-${elements.length}`} className="text-xl font-semibold text-gray-800 mb-3 mt-5">
+              {line.substring(4)}
+            </h3>
+          );
+        } else if (line.startsWith('- ')) {
+          if (currentParagraph.length > 0) {
+            elements.push(
+              <p key={`p-${elements.length}`} className="text-gray-700 leading-relaxed mb-4">
+                {currentParagraph.join(' ')}
+              </p>
+            );
+            currentParagraph = [];
+          }
+          
+          // Look ahead for more list items
+          const listItems = [line.substring(2)];
+          let j = i + 1;
+          while (j < lines.length && lines[j].trim().startsWith('- ')) {
+            listItems.push(lines[j].trim().substring(2));
+            j++;
+          }
+          i = j - 1; // Skip the processed items
+          
+          elements.push(
+            <ul key={`ul-${elements.length}`} className="list-disc list-inside text-gray-700 mb-4 space-y-2 ml-4">
+              {listItems.map((item, idx) => (
+                <li key={idx} className="leading-relaxed">{item}</li>
+              ))}
+            </ul>
+          );
+        } else if (line === '') {
+          if (currentParagraph.length > 0) {
+            elements.push(
+              <p key={`p-${elements.length}`} className="text-gray-700 leading-relaxed mb-4">
+                {currentParagraph.join(' ')}
+              </p>
+            );
+            currentParagraph = [];
+          }
+        } else if (line.length > 0) {
+          currentParagraph.push(line);
+        }
+      }
+      
+      // Add any remaining paragraph
+      if (currentParagraph.length > 0) {
+        elements.push(
+          <p key={`p-${elements.length}`} className="text-gray-700 leading-relaxed mb-4">
+            {currentParagraph.join(' ')}
+          </p>
+        );
+      }
+      
+      return elements;
+    };
+
+    return (
+      <motion.div
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: 1, x: 0 }}
+        exit={{ opacity: 0, x: -20 }}
+        transition={{ duration: 0.3 }}
+        className="space-y-6"
+      >
+        {/* Back Button */}
+        <motion.button
+          onClick={() => setSelectedArticle(null)}
+          className="flex items-center space-x-2 text-green-600 hover:text-green-700 font-medium"
+          whileHover={{ x: -5 }}
+        >
+          <ArrowLeft size={20} />
+          <span>Back to Articles</span>
+        </motion.button>
+
+        {/* Article Header */}
+        <motion.div 
+          className="bg-white rounded-2xl p-8 shadow-lg"
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.1 }}
+        >
+          {/* Article Image Banner */}
+        <div className="w-full h-64 mb-6 relative overflow-hidden rounded-2xl">
+          {selectedArticle.imageUrl ? (
+            <img 
+              src={selectedArticle.imageUrl} 
+              alt={selectedArticle.title}
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                e.target.style.display = 'none';
+                e.target.nextSibling.style.display = 'flex';
+              }}
+            />
+          ) : null}
+          <div className={`w-full h-full bg-gradient-to-br from-green-100 to-blue-100 ${selectedArticle.imageUrl ? 'hidden' : 'flex'} items-center justify-center`}>
+            <div className="text-8xl">
+              {selectedArticle.imageEmoji || '📝'}
+            </div>
+          </div>
+          <div className="absolute inset-0 bg-black bg-opacity-20"></div>
+          <div className="absolute bottom-6 left-6 text-white">
+            <span className="bg-green-500 text-white px-3 py-1 rounded-full text-sm font-medium capitalize">
+              {selectedArticle.category}
+            </span>
+          </div>
+        </div>
+
+        <div className="mb-6">
+            <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-3">
+              {selectedArticle.title}
+            </h1>
+            <p className="text-lg text-gray-600 mb-4">
+              {selectedArticle.excerpt}
+            </p>
+            <div className="flex items-center space-x-6 text-sm text-gray-500">
+              <span className="flex items-center space-x-1">
+                <Clock size={16} />
+                <span>{selectedArticle.readTime}</span>
+              </span>
+              <span>{selectedArticle.date}</span>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Article Content */}
+        <motion.div 
+          className="bg-white rounded-2xl p-8 shadow-lg"
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.2 }}
+        >
+          <div className="prose prose-lg max-w-none">
+            {renderContent(selectedArticle.content)}
+          </div>
+        </motion.div>
+
+        {/* Related Articles */}
+        <motion.div 
+          className="bg-gray-50 rounded-2xl p-6"
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.3 }}
+        >
+          <h3 className="text-xl font-bold text-gray-800 mb-4">More Articles You Might Like</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {articles
+              .filter(article => article.id !== selectedArticle.id && article.category === selectedArticle.category)
+              .slice(0, 2)
+              .map((article) => (
+                <motion.div
+                  key={article.id}
+                  className="bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition-all cursor-pointer"
+                  whileHover={{ y: -2 }}
+                  onClick={() => setSelectedArticle(article)}
+                >
+                  <div className="flex items-center space-x-3">
+                    <div className="flex-shrink-0">
+                      {article.imageUrl ? (
+                        <img 
+                          src={article.imageUrl} 
+                          alt={article.title}
+                          className="w-8 h-8 object-cover rounded-md shadow-sm"
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                            e.target.nextSibling.style.display = 'block';
+                          }}
+                        />
+                      ) : null}
+                      <div className={`text-2xl ${article.imageUrl ? 'hidden' : ''}`}>
+                        {article.imageEmoji || '📝'}
+                      </div>
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-gray-800">{article.title}</h4>
+                      <p className="text-sm text-gray-500">{article.readTime}</p>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+          </div>
+        </motion.div>
+      </motion.div>
+    );
+  };
+
+  const HomePage = () => (
     <motion.div
       initial="initial"
       animate="animate"
       variants={staggerContainer}
-      className="space-y-6"
+      className="space-y-12"
     >
-      <ErrorDisplay />
-      <DataStatus />
-      <FilterBar />
+      {error && <ErrorDisplay />}
+      {!loading && <DataStatus />}
       
+      {/* Hero Section */}
+      <motion.section 
+        className="bg-gradient-to-br from-yellow-300 via-pink-300 to-purple-400 rounded-3xl p-8 md:p-12 text-center relative overflow-hidden"
+        variants={fadeInUp}
+      >
+        <motion.div
+          className="absolute inset-0 opacity-10"
+          animate={{
+            backgroundPosition: ['0% 0%', '100% 100%'],
+          }}
+          transition={{
+            duration: 20,
+            repeat: Infinity,
+            repeatType: 'reverse'
+          }}
+          style={{
+            backgroundImage: 'url("data:image/svg+xml,%3Csvg width="40" height="40" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" stroke="%23fff" stroke-width="2"%3E%3Cpath d="M8 8l24 24M32 8l-24 24"/%3E%3C/g%3E%3C/svg%3E")',
+            backgroundSize: '40px 40px'
+          }}
+        />
+        
+        <motion.div
+          className="relative z-10"
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+        >
+          <div className="text-6xl md:text-8xl mb-4">🎨✨</div>
+          <h2 className="text-3xl md:text-5xl font-bold text-white mb-4">
+            Welcome to {settings.site_name || 'Happy Art Town'}!
+          </h2>
+          <p className="text-lg md:text-xl text-white mb-8 max-w-2xl mx-auto">
+            {settings.site_description || 'Where creativity comes alive! Join thousands of young artists learning to draw, paint, and create amazing art!'}
+          </p>
+          <motion.button
+            className="bg-white text-purple-600 px-8 py-4 rounded-full font-bold text-lg shadow-lg hover:shadow-xl transition-all"
+            whileHover={{ scale: 1.05, y: -2 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            Start Creating! 🚀
+          </motion.button>
+        </motion.div>
+      </motion.section>
+
       {loading ? <LoadingSpinner /> : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <>
+          {/* Latest Articles */}
+          <motion.section variants={fadeInUp}>
+            <div className="flex items-center justify-between mb-8">
+              <h3 className="text-2xl md:text-3xl font-bold text-gray-800 flex items-center">
+                <FileText className="mr-3 text-green-500" />
+                Latest Articles
+                <span className="ml-3 bg-green-100 text-green-600 px-2 py-1 rounded-full text-sm">
+                  {articles.length}
+                </span>
+              </h3>
+              <motion.button
+                onClick={() => setActiveSection('articles')}
+                className="text-green-500 hover:text-green-600 flex items-center font-medium"
+                whileHover={{ x: 5 }}
+              >
+                Read More <ChevronRight size={20} />
+              </motion.button>
+            </div>
+            
+            <motion.div 
+              className="grid grid-cols-1 md:grid-cols-2 gap-6"
+              variants={staggerContainer}
+            >
+              {articles.slice(0, 2).map((article) => (
+                <motion.div
+                  key={article.id}
+                  className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all"
+                  variants={fadeInUp}
+                  whileHover={{ y: -3 }}
+                >
+                  <div className="flex items-start space-x-4">
+                    <div className="flex-shrink-0">
+                      {article.imageUrl ? (
+                        <img 
+                          src={article.imageUrl} 
+                          alt={article.title}
+                          className="w-12 h-12 object-cover rounded-lg shadow-md"
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                            e.target.nextSibling.style.display = 'block';
+                          }}
+                        />
+                      ) : null}
+                      <div className={`text-3xl ${article.imageUrl ? 'hidden' : ''}`}>
+                        {article.imageEmoji || '📝'}
+                      </div>
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="text-lg font-bold text-gray-800 mb-2">{article.title}</h4>
+                      <p className="text-gray-600 mb-3">{article.excerpt}</p>
+                      <div className="flex items-center justify-between text-sm text-gray-500">
+                        <span>{article.readTime}</span>
+                        <span>{article.date}</span>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </motion.div>
+            
+            {articles.length === 0 && !loading && (
+              <motion.div 
+                className="text-center py-12 bg-gray-50 rounded-2xl"
+                variants={fadeInUp}
+              >
+                <FileText size={48} className="mx-auto text-gray-400 mb-4" />
+                <h4 className="text-lg font-medium text-gray-600 mb-2">No articles available</h4>
+                <p className="text-gray-500">Check back later or create some in the admin panel!</p>
+              </motion.div>
+            )}
+          </motion.section>
+
+          {/* Popular Courses */}
+          <motion.section variants={fadeInUp}>
+            <div className="flex items-center justify-between mb-8">
+              <h3 className="text-2xl md:text-3xl font-bold text-gray-800 flex items-center">
+                <BookOpen className="mr-3 text-blue-500" />
+                Popular Courses
+                <span className="ml-3 bg-blue-100 text-blue-600 px-2 py-1 rounded-full text-sm">
+                  {courses.length}
+                </span>
+              </h3>
+              <motion.button
+                onClick={() => setActiveSection('courses')}
+                className="text-blue-500 hover:text-blue-600 flex items-center font-medium"
+                whileHover={{ x: 5 }}
+              >
+                View All <ChevronRight size={20} />
+              </motion.button>
+            </div>
+            
+            <motion.div 
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+              variants={staggerContainer}
+            >
+              {courses.slice(0, 3).map((course) => (
+                <motion.div
+                  key={course.id}
+                  className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all border-2 border-transparent hover:border-purple-200 flex flex-col h-full"
+                  variants={fadeInUp}
+                  whileHover={{ y: -5 }}
+                >
+                  <div className="mb-4 text-center h-20 flex items-center justify-center">
+                    {course.imageUrl ? (
+                      <img 
+                        src={course.imageUrl} 
+                        alt={course.title}
+                        className="w-20 h-20 object-cover rounded-full shadow-lg"
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                          e.target.nextSibling.style.display = 'block';
+                        }}
+                      />
+                    ) : null}
+                    <div className={`text-4xl ${course.imageUrl ? 'hidden' : ''}`}>
+                      {course.imageEmoji || '🎨'}
+                    </div>
+                  </div>
+                  <h4 className="text-xl font-bold text-gray-800 mb-2">{course.title}</h4>
+                  <p className="text-gray-600 mb-4 flex-1">{course.description}</p>
+                  <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
+                    <span className="flex items-center">
+                      <Clock size={14} className="mr-1" />
+                      {course.duration}
+                    </span>
+                    <span className="bg-purple-100 text-purple-600 px-2 py-1 rounded-full">
+                      {course.ageGroup} years
+                    </span>
+                  </div>
+                  <motion.button
+                    className="w-full bg-gradient-to-r from-purple-400 to-pink-400 text-white py-3 rounded-xl font-medium mt-auto"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => setSelectedCourse(course)}
+                  >
+                    View Course
+                  </motion.button>
+                </motion.div>
+              ))}
+            </motion.div>
+            
+            {courses.length === 0 && !loading && (
+              <motion.div 
+                className="text-center py-12 bg-gray-50 rounded-2xl"
+                variants={fadeInUp}
+              >
+                <BookOpen size={48} className="mx-auto text-gray-400 mb-4" />
+                <h4 className="text-lg font-medium text-gray-600 mb-2">No courses available</h4>
+                <p className="text-gray-500">Check back later or create some in the admin panel!</p>
+              </motion.div>
+            )}
+          </motion.section>
+        </>
+      )}
+    </motion.div>
+  );
+
+  const CoursesPage = () => (
+    <motion.div
+      initial="initial"
+      animate="animate"
+      variants={staggerContainer}
+      className="space-y-8"
+    >
+      {error && <ErrorDisplay />}
+      {!loading && <DataStatus />}
+      
+      <motion.div variants={fadeInUp}>
+        <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-6 flex items-center">
+          <BookOpen className="mr-3 text-blue-500" />
+          Art Courses for Every Age
+          <span className="ml-3 bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-lg">
+            {filteredCourses.length}
+          </span>
+        </h2>
+        
+        {/* Age Group Filter */}
+        <div className="flex flex-wrap gap-3 mb-8">
+          {ageGroups.map((group) => (
+            <motion.button
+              key={group.value}
+              onClick={() => setSelectedAgeGroup(group.value)}
+              className={`flex items-center space-x-2 px-6 py-3 rounded-full font-medium transition-all ${
+                selectedAgeGroup === group.value
+                  ? 'bg-blue-500 text-white shadow-lg'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <span>{group.icon}</span>
+              <span>{group.label}</span>
+            </motion.button>
+          ))}
+        </div>
+      </motion.div>
+
+      {loading ? <LoadingSpinner /> : (
+        <motion.div 
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+          variants={staggerContainer}
+        >
           {filteredCourses.map((course) => (
             <motion.div
               key={course.id}
-              className="bg-white rounded-xl p-6 shadow-lg border border-gray-100"
+              className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all border-2 border-transparent hover:border-blue-200 flex flex-col h-full"
               variants={fadeInUp}
               whileHover={{ y: -5 }}
               layout
             >
-              <div className="flex items-start justify-between mb-4">
-                <div className="w-16 h-16 flex items-center justify-center">
-                  {course.image_url ? (
-                    <img 
-                      src={course.image_url} 
-                      alt={course.title}
-                      className="w-14 h-14 rounded-xl object-cover"
-                    />
-                  ) : (
-                    <div className="text-4xl">{course.image_emoji}</div>
-                  )}
-                </div>
-                <div className="flex space-x-2">
-                  <motion.button
-                    onClick={() => handlePublishToggle(course, 'course')}
-                    className={`p-2 rounded-lg ${
-                      course.is_published 
-                        ? 'bg-green-100 text-green-600 hover:bg-green-200' 
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                    }`}
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                  >
-                    {course.is_published ? <Eye size={16} /> : <EyeOff size={16} />}
-                  </motion.button>
-                  <motion.button
-                    onClick={() => {
-                      setEditingItem(course);
-                      setShowForm(true);
+              <div className="mb-4 text-center h-24 flex items-center justify-center">
+                {course.imageUrl ? (
+                  <img 
+                    src={course.imageUrl} 
+                    alt={course.title}
+                    className="w-24 h-24 object-cover rounded-full shadow-lg"
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                      e.target.nextSibling.style.display = 'block';
                     }}
-                    className="p-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200"
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                  >
-                    <Edit3 size={16} />
-                  </motion.button>
-                  <motion.button
-                    onClick={() => handleDelete(course.id, 'course')}
-                    className="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200"
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                  >
-                    <Trash2 size={16} />
-                  </motion.button>
+                  />
+                ) : null}
+                <div className={`text-5xl ${course.imageUrl ? 'hidden' : ''}`}>
+                  {course.imageEmoji || '🎨'}
                 </div>
               </div>
+              <h3 className="text-xl font-bold text-gray-800 mb-2">{course.title}</h3>
+              <p className="text-gray-600 mb-4 flex-1">{course.description}</p>
               
-              <h3 className="text-lg font-bold text-gray-800 mb-2">{course.title}</h3>
-              <p className="text-gray-600 text-sm mb-4 line-clamp-2">{course.description}</p>
-              
-              <div className="space-y-2">
+              <div className="space-y-2 mb-4">
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-500">Age Group:</span>
-                  <span className="font-medium">{course.age_group} years</span>
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-500">Duration:</span>
+                  <span className="text-gray-500 flex items-center">
+                    <Clock size={14} className="mr-1" />
+                    Duration:
+                  </span>
                   <span className="font-medium">{course.duration}</span>
                 </div>
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-500">Lessons:</span>
+                  <span className="text-gray-500 flex items-center">
+                    <Play size={14} className="mr-1" />
+                    Lessons:
+                  </span>
                   <span className="font-medium">{course.lessons}</span>
                 </div>
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-500">Level:</span>
+                  <span className="text-gray-500 flex items-center">
+                    <Award size={14} className="mr-1" />
+                    Level:
+                  </span>
                   <span className="font-medium">{course.difficulty}</span>
                 </div>
               </div>
               
-              <div className="flex items-center justify-between mt-4 pt-4 border-t">
-                <div className={`px-3 py-1 rounded-full text-xs font-medium ${
-                  course.is_published 
-                    ? 'bg-green-100 text-green-600' 
-                    : 'bg-gray-100 text-gray-600'
-                }`}>
-                  {course.is_published ? 'Published' : 'Draft'}
-                </div>
-                <span className="text-xs text-gray-400">
-                  {new Date(course.created_at).toLocaleDateString()}
+              <div className="flex items-center justify-between mb-4">
+                <span className="bg-purple-100 text-purple-600 px-3 py-1 rounded-full text-sm font-medium">
+                  Ages {course.ageGroup}
                 </span>
+                <div className="flex items-center text-yellow-500">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} size={16} fill="currentColor" />
+                  ))}
+                </div>
               </div>
+              
+              <motion.button
+                className="w-full bg-gradient-to-r from-blue-400 to-purple-400 text-white py-3 rounded-xl font-medium flex items-center justify-center mt-auto"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => setSelectedCourse(course)}
+              >
+                <Play size={18} className="mr-2" />
+                View Course
+              </motion.button>
             </motion.div>
           ))}
-        </div>
+        </motion.div>
       )}
-
+      
       {!loading && filteredCourses.length === 0 && (
         <motion.div 
-          className="text-center py-12"
+          className="text-center py-16 bg-gray-50 rounded-2xl"
           variants={fadeInUp}
         >
-          <BookOpen size={48} className="mx-auto text-gray-400 mb-4" />
-          <h3 className="text-lg font-medium text-gray-600 mb-2">No courses found</h3>
-          <p className="text-gray-500">Try adjusting your search or filters</p>
+          <BookOpen size={64} className="mx-auto text-gray-400 mb-4" />
+          <h3 className="text-xl font-medium text-gray-600 mb-2">No courses found</h3>
+          <p className="text-gray-500">Try selecting a different age group or create new courses in the admin panel!</p>
         </motion.div>
       )}
     </motion.div>
   );
 
-  const ArticlesList = () => (
+  const ArticlesPage = () => (
     <motion.div
       initial="initial"
       animate="animate"
       variants={staggerContainer}
-      className="space-y-6"
+      className="space-y-8"
     >
-      <ErrorDisplay />
-      <DataStatus />
-      <FilterBar />
+      {error && <ErrorDisplay />}
+      {!loading && <DataStatus />}
       
+      <motion.div variants={fadeInUp}>
+        <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-6 flex items-center">
+          <FileText className="mr-3 text-green-500" />
+          Art Tips & Inspiration
+          <span className="ml-3 bg-green-100 text-green-600 px-3 py-1 rounded-full text-lg">
+            {filteredArticles.length}
+          </span>
+        </h2>
+        
+        {/* Category Filter */}
+        <div className="flex flex-wrap gap-3 mb-8">
+          {categories.map((category) => (
+            <motion.button
+              key={category.value}
+              onClick={() => setSelectedCategory(category.value)}
+              className={`flex items-center space-x-2 px-6 py-3 rounded-full font-medium transition-all ${
+                selectedCategory === category.value
+                  ? 'bg-green-500 text-white shadow-lg'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <span>{category.icon}</span>
+              <span>{category.label}</span>
+            </motion.button>
+          ))}
+        </div>
+      </motion.div>
+
       {loading ? <LoadingSpinner /> : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <motion.div 
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+          variants={staggerContainer}
+        >
           {filteredArticles.map((article) => (
             <motion.div
               key={article.id}
-              className="bg-white rounded-xl p-6 shadow-lg border border-gray-100"
+              className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all border-2 border-transparent hover:border-green-200 flex flex-col h-full"
               variants={fadeInUp}
-              whileHover={{ y: -5 }}
+              whileHover={{ y: -3 }}
               layout
             >
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center space-x-3">
-                  <div className="w-12 h-12 flex items-center justify-center">
-                    {article.image_url ? (
-                      <img 
-                        src={article.image_url} 
-                        alt={article.title}
-                        className="w-10 h-10 rounded-lg object-cover"
-                      />
-                    ) : (
-                      <div className="text-3xl">{article.image_emoji}</div>
-                    )}
-                  </div>
-                  <div className={`px-2 py-1 rounded-full text-xs font-medium capitalize ${
-                    article.category === 'tips' ? 'bg-blue-100 text-blue-600' :
-                    article.category === 'tutorials' ? 'bg-green-100 text-green-600' :
-                    'bg-purple-100 text-purple-600'
-                  }`}>
-                    {article.category}
-                  </div>
-                </div>
-                <div className="flex space-x-2">
-                  <motion.button
-                    onClick={() => handlePublishToggle(article, 'article')}
-                    className={`p-2 rounded-lg ${
-                      article.is_published 
-                        ? 'bg-green-100 text-green-600 hover:bg-green-200' 
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                    }`}
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                  >
-                    {article.is_published ? <Eye size={16} /> : <EyeOff size={16} />}
-                  </motion.button>
-                  <motion.button
-                    onClick={() => {
-                      setEditingItem(article);
-                      setShowForm(true);
+              {/* Article Image */}
+              <div className="w-full h-48 mb-4 flex items-center justify-center bg-gradient-to-br from-green-50 to-blue-50 rounded-t-2xl">
+                {article.imageUrl ? (
+                  <img 
+                    src={article.imageUrl} 
+                    alt={article.title}
+                    className="w-full h-full object-cover rounded-t-2xl"
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                      e.target.nextSibling.style.display = 'flex';
                     }}
-                    className="p-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200"
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                  >
-                    <Edit3 size={16} />
-                  </motion.button>
-                  <motion.button
-                    onClick={() => handleDelete(article.id, 'article')}
-                    className="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200"
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                  >
-                    <Trash2 size={16} />
-                  </motion.button>
+                  />
+                ) : null}
+                <div className={`text-6xl ${article.imageUrl ? 'hidden' : 'flex'} items-center justify-center h-full w-full`}>
+                  {article.imageEmoji || '📝'}
                 </div>
               </div>
-              
-              <h3 className="text-lg font-bold text-gray-800 mb-2">{article.title}</h3>
-              <p className="text-gray-600 text-sm mb-4 line-clamp-3">{article.excerpt}</p>
-              
-              <div className="flex items-center justify-between text-sm mb-4">
-                <span className="text-gray-500">{article.read_time}</span>
-                <span className="text-gray-400">
-                  {new Date(article.created_at).toLocaleDateString()}
-                </span>
-              </div>
-              
-              <div className={`px-3 py-1 rounded-full text-xs font-medium w-fit ${
-                article.is_published 
-                  ? 'bg-green-100 text-green-600' 
-                  : 'bg-gray-100 text-gray-600'
-              }`}>
-                {article.is_published ? 'Published' : 'Draft'}
+
+              {/* Article Content */}
+              <div className="p-6 flex-1 flex flex-col">
+                <div className="mb-3">
+                  <span className="bg-green-100 text-green-600 px-3 py-1 rounded-full text-xs capitalize font-medium">
+                    {article.category}
+                  </span>
+                </div>
+                
+                <h3 className="text-xl font-bold text-gray-800 mb-3 line-clamp-2">{article.title}</h3>
+                <p className="text-gray-600 mb-4 line-clamp-3 flex-1">{article.excerpt}</p>
+                
+                <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
+                  <span className="flex items-center">
+                    <Clock size={14} className="mr-1" />
+                    {article.readTime}
+                  </span>
+                  <span>{article.date}</span>
+                </div>
+                
+                <motion.button
+                  className="w-full bg-gradient-to-r from-green-400 to-blue-400 text-white py-3 rounded-xl font-medium flex items-center justify-center mt-auto"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => setSelectedArticle(article)}
+                >
+                  <FileText size={18} className="mr-2" />
+                  View Article
+                </motion.button>
               </div>
             </motion.div>
           ))}
-        </div>
+        </motion.div>
       )}
-
+      
       {!loading && filteredArticles.length === 0 && (
         <motion.div 
-          className="text-center py-12"
+          className="text-center py-16 bg-gray-50 rounded-2xl"
           variants={fadeInUp}
         >
-          <FileText size={48} className="mx-auto text-gray-400 mb-4" />
-          <h3 className="text-lg font-medium text-gray-600 mb-2">No articles found</h3>
-          <p className="text-gray-500">Try adjusting your search or filters</p>
+          <FileText size={64} className="mx-auto text-gray-400 mb-4" />
+          <h3 className="text-xl font-medium text-gray-600 mb-2">No articles found</h3>
+          <p className="text-gray-500">Try selecting a different category or create new articles in the admin panel!</p>
         </motion.div>
       )}
     </motion.div>
   );
 
-  // Image Upload Component
-  const ImageUpload = ({ onImageSelect, currentImage, currentEmoji }) => {
-    const [dragOver, setDragOver] = useState(false);
-    const [uploading, setUploading] = useState(false);
-
-    const handleFileSelect = async (file) => {
-      if (!file) return;
-
-      // Validate file type
-      if (!file.type.startsWith('image/')) {
-        showNotification('Please select an image file', 'error');
-        return;
-      }
-
-      // Validate file size (max 5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        showNotification('Image size must be less than 5MB', 'error');
-        return;
-      }
-
-      setUploading(true);
-      try {
-        const imageUrl = await uploadImage(file);
-        onImageSelect(imageUrl);
-        showNotification('Image uploaded successfully!');
-      } catch (error) {
-        console.error('Upload error:', error);
-        showNotification('Failed to upload image: ' + error.message, 'error');
-      } finally {
-        setUploading(false);
-      }
-    };
-
-    const handleDrop = (e) => {
-      e.preventDefault();
-      setDragOver(false);
-      const file = e.dataTransfer.files[0];
-      if (file) handleFileSelect(file);
-    };
-
-    const handleDragOver = (e) => {
-      e.preventDefault();
-      setDragOver(true);
-    };
-
-    const handleDragLeave = () => {
-      setDragOver(false);
-    };
-
-    return (
-      <div className="space-y-4">
-        <label className="block text-sm font-medium text-gray-700">Image</label>
-        
-        {/* Current Image Preview */}
-        {(currentImage || currentEmoji) && (
-          <div className="flex items-center space-x-4 p-3 bg-gray-50 rounded-lg">
-            <div className="w-16 h-16 flex items-center justify-center">
-              {currentImage ? (
-                <img 
-                  src={currentImage} 
-                  alt="Current"
-                  className="w-14 h-14 rounded-lg object-cover"
-                />
-              ) : (
-                <div className="text-3xl">{currentEmoji}</div>
-              )}
-            </div>
-            <div className="flex-1">
-              <p className="text-sm font-medium text-gray-700">
-                {currentImage ? 'Custom Image' : 'Emoji'}
-              </p>
-              <p className="text-xs text-gray-500">
-                {currentImage ? 'Uploaded image' : 'Default emoji icon'}
-              </p>
-            </div>
-          </div>
-        )}
-
-        {/* Upload Area */}
-        <div
-          className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
-            dragOver 
-              ? 'border-purple-400 bg-purple-50' 
-              : 'border-gray-300 hover:border-gray-400'
-          } ${uploading ? 'opacity-50 pointer-events-none' : ''}`}
-          onDrop={handleDrop}
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-        >
-          {uploading ? (
-            <div className="flex flex-col items-center space-y-2">
-              <RefreshCw className="animate-spin text-purple-500" size={32} />
-              <p className="text-sm text-gray-600">Uploading image...</p>
-            </div>
-          ) : (
-            <>
-              <ImageIcon className="mx-auto text-gray-400 mb-4" size={48} />
-              <p className="text-gray-600 mb-2">
-                Drag and drop an image here, or{' '}
-                <label className="text-purple-600 hover:text-purple-700 cursor-pointer font-medium">
-                  browse files
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => handleFileSelect(e.target.files[0])}
-                    className="hidden"
-                  />
-                </label>
-              </p>
-              <p className="text-xs text-gray-500">
-                Supports: JPG, PNG, GIF (max 5MB)
-              </p>
-            </>
-          )}
-        </div>
-
-        {/* Remove Image Button */}
-        {currentImage && (
-          <button
-            type="button"
-            onClick={() => onImageSelect(null)}
-            className="text-sm text-red-600 hover:text-red-700"
-            disabled={uploading}
-          >
-            Remove image (use emoji instead)
-          </button>
-        )}
-      </div>
-    );
-  };
-
-  const CourseForm = ({ course, onSave, onCancel }) => {
-    const [formData, setFormData] = useState({
-      title: course?.title || '',
-      description: course?.description || '',
-      age_group: course?.age_group || '2-4',
-      image_emoji: course?.image_emoji || '🎨',
-      image_url: course?.image_url || null,
-      duration: course?.duration || '',
-      lessons: course?.lessons || 0,
-      difficulty: course?.difficulty || 'Beginner'
-    });
-
-    const [isSubmitting, setIsSubmitting] = useState(false);
-
-    const handleSubmit = async (e) => {
-      e.preventDefault();
-      
-      // Validate required fields
-      if (!formData.title.trim()) {
-        showNotification('Title is required', 'error');
-        return;
-      }
-      
-      if (!formData.description.trim()) {
-        showNotification('Description is required', 'error');
-        return;
-      }
-
-      console.log('📝 Form submitted with data:', formData);
-      setIsSubmitting(true);
-      
-      try {
-        await onSave(formData, 'course');
-        console.log('✅ Form save completed successfully');
-      } catch (error) {
-        console.error('❌ Form save failed:', error);
-        // Error handling is done in onSave function
-      } finally {
-        setIsSubmitting(false);
-      }
-    };
-
-    const handleImageSelect = (imageUrl) => {
-      setFormData(prev => ({ ...prev, image_url: imageUrl }));
-    };
-
-    return (
-      <motion.div
-        className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        onClick={(e) => {
-          // Close modal if clicking on backdrop
-          if (e.target === e.currentTarget) {
-            onCancel();
-          }
-        }}
-      >
-        <motion.div
-          className="bg-white rounded-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto"
-          initial={{ scale: 0.9, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          exit={{ scale: 0.9, opacity: 0 }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-2xl font-bold text-gray-800">
-              {course ? 'Edit Course' : 'Create New Course'}
-            </h3>
-            <button
-              onClick={onCancel}
-              className="text-gray-400 hover:text-gray-600 p-2"
-              disabled={isSubmitting}
-            >
-              <X size={24} />
-            </button>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Title <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                value={formData.title}
-                onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                placeholder="Enter course title"
-                disabled={isSubmitting}
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Description <span className="text-red-500">*</span>
-              </label>
-              <textarea
-                value={formData.description}
-                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                rows="3"
-                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                placeholder="Enter course description"
-                disabled={isSubmitting}
-                required
-              />
-            </div>
-
-            {/* Image Upload */}
-            <ImageUpload 
-              onImageSelect={handleImageSelect}
-              currentImage={formData.image_url}
-              currentEmoji={formData.image_emoji}
-            />
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Age Group</label>
-                <select
-                  value={formData.age_group}
-                  onChange={(e) => setFormData(prev => ({ ...prev, age_group: e.target.value }))}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  disabled={isSubmitting}
-                >
-                  <option value="2-4">2-4 Years</option>
-                  <option value="5-8">5-8 Years</option>
-                  <option value="9-12">9-12 Years</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Difficulty</label>
-                <select
-                  value={formData.difficulty}
-                  onChange={(e) => setFormData(prev => ({ ...prev, difficulty: e.target.value }))}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  disabled={isSubmitting}
-                >
-                  <option value="Beginner">Beginner</option>
-                  <option value="Easy">Easy</option>
-                  <option value="Intermediate">Intermediate</option>
-                  <option value="Advanced">Advanced</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-3 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Fallback Emoji</label>
-                <input
-                  type="text"
-                  value={formData.image_emoji}
-                  onChange={(e) => setFormData(prev => ({ ...prev, image_emoji: e.target.value }))}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-center text-2xl"
-                  placeholder="🎨"
-                  maxLength="2"
-                  disabled={isSubmitting}
-                />
-                <p className="text-xs text-gray-500 mt-1">Used when no image</p>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Duration</label>
-                <input
-                  type="text"
-                  value={formData.duration}
-                  onChange={(e) => setFormData(prev => ({ ...prev, duration: e.target.value }))}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  placeholder="15 mins"
-                  disabled={isSubmitting}
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Lessons</label>
-                <input
-                  type="number"
-                  value={formData.lessons}
-                  onChange={(e) => setFormData(prev => ({ ...prev, lessons: parseInt(e.target.value) || 0 }))}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  min="0"
-                  max="100"
-                  disabled={isSubmitting}
-                />
-              </div>
-            </div>
-
-            <div className="flex space-x-3 pt-4 border-t">
-              <motion.button
-                type="submit"
-                className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white py-3 rounded-lg font-medium flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
-                whileHover={!isSubmitting ? { scale: 1.02 } : {}}
-                whileTap={!isSubmitting ? { scale: 0.98 } : {}}
-                disabled={isSubmitting}
-              >
-                <Save size={18} className="mr-2" />
-                {isSubmitting ? 'Saving...' : `Save Course`}
-              </motion.button>
-              <motion.button
-                type="button"
-                onClick={onCancel}
-                className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                whileHover={!isSubmitting ? { scale: 1.02 } : {}}
-                whileTap={!isSubmitting ? { scale: 0.98 } : {}}
-                disabled={isSubmitting}
-              >
-                Cancel
-              </motion.button>
-            </div>
-          </form>
-        </motion.div>
-      </motion.div>
-    );
-  };
-
-  const ArticleForm = ({ article, onSave, onCancel }) => {
-    const [formData, setFormData] = useState({
-      title: article?.title || '',
-      excerpt: article?.excerpt || '',
-      content: article?.content || '',
-      category: article?.category || 'tips',
-      image_emoji: article?.image_emoji || '📝',
-      image_url: article?.image_url || null,
-      read_time: article?.read_time || ''
-    });
-
-    const [isSubmitting, setIsSubmitting] = useState(false);
-
-    const handleSubmit = async (e) => {
-      e.preventDefault();
-      
-      // Validate required fields
-      if (!formData.title.trim()) {
-        showNotification('Title is required', 'error');
-        return;
-      }
-      
-      if (!formData.excerpt.trim()) {
-        showNotification('Excerpt is required', 'error');
-        return;
-      }
-
-      if (!formData.content.trim()) {
-        showNotification('Content is required', 'error');
-        return;
-      }
-
-      console.log('📝 Article form submitted with data:', formData);
-      setIsSubmitting(true);
-      
-      try {
-        await onSave(formData, 'article');
-        console.log('✅ Article form save completed successfully');
-      } catch (error) {
-        console.error('❌ Article form save failed:', error);
-        // Error handling is done in onSave function
-      } finally {
-        setIsSubmitting(false);
-      }
-    };
-
-    const handleImageSelect = (imageUrl) => {
-      setFormData(prev => ({ ...prev, image_url: imageUrl }));
-    };
-
-    return (
-      <motion.div
-        className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        onClick={(e) => {
-          // Close modal if clicking on backdrop
-          if (e.target === e.currentTarget) {
-            onCancel();
-          }
-        }}
-      >
-        <motion.div
-          className="bg-white rounded-xl p-6 w-full max-w-3xl max-h-[90vh] overflow-y-auto"
-          initial={{ scale: 0.9, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          exit={{ scale: 0.9, opacity: 0 }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-2xl font-bold text-gray-800">
-              {article ? 'Edit Article' : 'Create New Article'}
-            </h3>
-            <button
-              onClick={onCancel}
-              className="text-gray-400 hover:text-gray-600 p-2"
-              disabled={isSubmitting}
-            >
-              <X size={24} />
-            </button>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Title <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                value={formData.title}
-                onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                placeholder="Enter article title"
-                disabled={isSubmitting}
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Excerpt <span className="text-red-500">*</span>
-              </label>
-              <textarea
-                value={formData.excerpt}
-                onChange={(e) => setFormData(prev => ({ ...prev, excerpt: e.target.value }))}
-                rows="2"
-                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                placeholder="Enter article excerpt"
-                disabled={isSubmitting}
-                required
-              />
-            </div>
-
-            {/* Image Upload */}
-            <ImageUpload 
-              onImageSelect={handleImageSelect}
-              currentImage={formData.image_url}
-              currentEmoji={formData.image_emoji}
-            />
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Content <span className="text-red-500">*</span>
-              </label>
-              <textarea
-                value={formData.content}
-                onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
-                rows="8"
-                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                placeholder="Enter article content"
-                disabled={isSubmitting}
-                required
-              />
-            </div>
-
-            <div className="grid grid-cols-3 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
-                <select
-                  value={formData.category}
-                  onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  disabled={isSubmitting}
-                >
-                  <option value="tips">Tips</option>
-                  <option value="tutorials">Tutorials</option>
-                  <option value="inspiration">Inspiration</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Fallback Emoji</label>
-                <input
-                  type="text"
-                  value={formData.image_emoji}
-                  onChange={(e) => setFormData(prev => ({ ...prev, image_emoji: e.target.value }))}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-center text-2xl"
-                  placeholder="📝"
-                  maxLength="2"
-                  disabled={isSubmitting}
-                />
-                <p className="text-xs text-gray-500 mt-1">Used when no image</p>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Read Time</label>
-                <input
-                  type="text"
-                  value={formData.read_time}
-                  onChange={(e) => setFormData(prev => ({ ...prev, read_time: e.target.value }))}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  placeholder="5 min read"
-                  disabled={isSubmitting}
-                />
-              </div>
-            </div>
-
-            <div className="flex space-x-3 pt-4 border-t">
-              <motion.button
-                type="submit"
-                className="flex-1 bg-gradient-to-r from-green-500 to-blue-500 text-white py-3 rounded-lg font-medium flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
-                whileHover={!isSubmitting ? { scale: 1.02 } : {}}
-                whileTap={!isSubmitting ? { scale: 0.98 } : {}}
-                disabled={isSubmitting}
-              >
-                <Save size={18} className="mr-2" />
-                {isSubmitting ? 'Saving...' : 'Save Article'}
-              </motion.button>
-              <motion.button
-                type="button"
-                onClick={onCancel}
-                className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                whileHover={!isSubmitting ? { scale: 1.02 } : {}}
-                whileTap={!isSubmitting ? { scale: 0.98 } : {}}
-                disabled={isSubmitting}
-              >
-                Cancel
-              </motion.button>
-            </div>
-          </form>
-        </motion.div>
-      </motion.div>
-    );
-  };
-
-  const Settings = () => {
-    const [settingsForm, setSettingsForm] = useState({
-      site_name: settings.site_name || '',
-      site_description: settings.site_description || '',
-      contact_email: settings.contact_email || '',
-      max_courses_per_user: settings.max_courses_per_user || '10'
-    });
-
-    // Update form when settings are loaded
-    useEffect(() => {
-      setSettingsForm({
-        site_name: settings.site_name || '',
-        site_description: settings.site_description || '',
-        contact_email: settings.contact_email || '',
-        max_courses_per_user: settings.max_courses_per_user || '10'
-      });
-    }, [settings]);
-
-    const handleSettingsSubmit = (e) => {
-      e.preventDefault();
-      saveSettings(settingsForm);
-    };
-
-    return (
-      <motion.div
-        initial="initial"
-        animate="animate"
-        variants={staggerContainer}
-        className="space-y-6 max-w-5xl w-full relative z-0"
-      >
-        <ErrorDisplay />
-        <DataStatus />
-        
-        <motion.div variants={fadeInUp} className="bg-white p-6 rounded-xl shadow-lg w-full">
-          <h3 className="text-xl font-bold text-gray-800 mb-4">General Settings</h3>
-          <form onSubmit={handleSettingsSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Site Name</label>
-              <input
-                type="text"
-                value={settingsForm.site_name}
-                onChange={(e) => setSettingsForm(prev => ({ ...prev, site_name: e.target.value }))}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                placeholder="Happy Art Town"
-                disabled={settingsLoading}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-              <textarea
-                value={settingsForm.site_description}
-                onChange={(e) => setSettingsForm(prev => ({ ...prev, site_description: e.target.value }))}
-                rows="3"
-                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                placeholder="Where creativity comes alive! Join thousands of young artists learning to draw, paint, and create amazing art!"
-                disabled={settingsLoading}
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Contact Email</label>
-                <input
-                  type="email"
-                  value={settingsForm.contact_email}
-                  onChange={(e) => setSettingsForm(prev => ({ ...prev, contact_email: e.target.value }))}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  placeholder="admin@happyarttown.com"
-                  disabled={settingsLoading}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Max Courses Per User</label>
-                <input
-                  type="number"
-                  value={settingsForm.max_courses_per_user}
-                  onChange={(e) => setSettingsForm(prev => ({ ...prev, max_courses_per_user: e.target.value }))}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  min="1"
-                  max="100"
-                  disabled={settingsLoading}
-                />
-              </div>
-            </div>
-            <div className="flex justify-end">
-              <motion.button
-                type="submit"
-                className="px-6 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg font-medium flex items-center space-x-2 disabled:opacity-50"
-                whileHover={!settingsLoading ? { scale: 1.02 } : {}}
-                whileTap={!settingsLoading ? { scale: 0.98 } : {}}
-                disabled={settingsLoading}
-              >
-                <Save size={16} />
-                <span>{settingsLoading ? 'Saving...' : 'Save General Settings'}</span>
-              </motion.button>
-            </div>
-          </form>
-        </motion.div>
-
-        <motion.div variants={fadeInUp} className="bg-white p-6 rounded-xl shadow-lg w-full">
-          <h3 className="text-xl font-bold text-gray-800 mb-4">Database Settings</h3>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Supabase URL</label>
-              <input
-                type="text"
-                placeholder="https://your-project.supabase.co"
-                defaultValue={supabaseUrl || ''}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 bg-gray-50"
-                readOnly
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Supabase Key</label>
-              <input
-                type="password"
-                placeholder="Your Supabase anon key"
-                defaultValue={supabaseAnonKey ? '••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••' : ''}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 bg-gray-50"
-                readOnly
-              />
-            </div>
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <div className="flex items-center space-x-3">
-                <div className={`w-3 h-3 rounded-full ${
-                  usingMockData ? 'bg-red-400' : 'bg-green-400'
-                }`}></div>
-                <div>
-                  <p className="text-sm text-gray-600">
-                    <strong>Status:</strong> {usingMockData ? '❌ Not connected' : '✅ Connected'}
-                  </p>
-                  <p className="text-sm text-gray-500 mt-1">
-                    {usingMockData 
-                      ? 'Add your Supabase credentials to .env file to connect to your database'
-                      : 'Successfully connected to your Supabase database'
-                    }
-                  </p>
-                </div>
-              </div>
-            </div>
-            <div className="flex justify-end">
-              <motion.button
-                onClick={() => { loadData(); loadSettings(); }}
-                className="px-6 py-2 bg-blue-500 text-white rounded-lg font-medium flex items-center space-x-2"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                disabled={loading || settingsLoading}
-              >
-                <RefreshCw size={16} className={(loading || settingsLoading) ? 'animate-spin' : ''} />
-                <span>Test Connection</span>
-              </motion.button>
-            </div>
-          </div>
-        </motion.div>
-
-        <motion.div variants={fadeInUp} className="bg-white p-6 rounded-xl shadow-lg w-full">
-          <h3 className="text-xl font-bold text-gray-800 mb-4">Database Schema</h3>
-          <div className="space-y-4">
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <h4 className="font-medium text-gray-700 mb-2">Required Tables:</h4>
-              <div className="text-sm text-gray-600 space-y-1">
-                <p><code className="bg-gray-200 px-2 py-1 rounded">courses</code> - Store course information</p>
-                <p><code className="bg-gray-200 px-2 py-1 rounded">articles</code> - Store article content</p>
-                <p><code className="bg-gray-200 px-2 py-1 rounded">settings</code> - Store application settings</p>
-              </div>
-            </div>
-            
-            <div className="bg-orange-50 p-4 rounded-lg">
-              <h4 className="font-medium text-orange-700 mb-2">Storage Setup Required:</h4>
-              <div className="text-sm text-orange-600 space-y-1">
-                <p>• Create a storage bucket named <code className="bg-orange-200 px-2 py-1 rounded">images</code></p>
-                <p>• Enable public access to the bucket for image viewing</p>
-                <p>• Configure upload policies for authenticated users</p>
-              </div>
-            </div>
-
-            <div className="bg-blue-50 p-4 rounded-lg">
-              <p className="text-sm text-blue-700">
-                💡 <strong>Tip:</strong> Create these tables and storage bucket in your Supabase dashboard to enable full functionality including image uploads.
-              </p>
-            </div>
-            
-            <div className="bg-green-50 p-4 rounded-lg">
-              <h4 className="font-medium text-green-700 mb-2">Updated SQL Commands for Table Creation:</h4>
-              <div className="relative">
-                <pre className="text-xs text-green-600 bg-green-100 p-3 rounded overflow-x-auto max-h-96 overflow-y-auto">
-{`-- Create courses table (updated with image_url)
-CREATE TABLE courses (
-  id SERIAL PRIMARY KEY,
-  title VARCHAR(255) NOT NULL,
-  description TEXT,
-  age_group VARCHAR(10),
-  image_emoji VARCHAR(10),
-  image_url TEXT,
-  duration VARCHAR(50),
-  lessons INTEGER DEFAULT 0,
-  difficulty VARCHAR(50),
-  is_published BOOLEAN DEFAULT false,
-  created_at TIMESTAMP DEFAULT NOW(),
-  updated_at TIMESTAMP DEFAULT NOW()
-);
-
--- Create articles table (updated with image_url)
-CREATE TABLE articles (
-  id SERIAL PRIMARY KEY,
-  title VARCHAR(255) NOT NULL,
-  excerpt TEXT,
-  content TEXT,
-  category VARCHAR(50),
-  image_emoji VARCHAR(10),
-  image_url TEXT,
-  read_time VARCHAR(50),
-  is_published BOOLEAN DEFAULT false,
-  created_at TIMESTAMP DEFAULT NOW(),
-  updated_at TIMESTAMP DEFAULT NOW()
-);
-
--- Create settings table
-CREATE TABLE settings (
-  id SERIAL PRIMARY KEY,
-  key VARCHAR(255) UNIQUE NOT NULL,
-  value TEXT,
-  description TEXT,
-  created_at TIMESTAMP DEFAULT NOW(),
-  updated_at TIMESTAMP DEFAULT NOW()
-);
-
--- Enable Row Level Security (RLS)
-ALTER TABLE courses ENABLE ROW LEVEL SECURITY;
-ALTER TABLE articles ENABLE ROW LEVEL SECURITY;
-ALTER TABLE settings ENABLE ROW LEVEL SECURITY;
-
--- Create policies (adjust as needed for your security requirements)
-CREATE POLICY "Enable read access for all users" ON courses FOR SELECT USING (true);
-CREATE POLICY "Enable insert for all users" ON courses FOR INSERT WITH CHECK (true);
-CREATE POLICY "Enable update for all users" ON courses FOR UPDATE USING (true);
-CREATE POLICY "Enable delete for all users" ON courses FOR DELETE USING (true);
-
-CREATE POLICY "Enable read access for all users" ON articles FOR SELECT USING (true);
-CREATE POLICY "Enable insert for all users" ON articles FOR INSERT WITH CHECK (true);
-CREATE POLICY "Enable update for all users" ON articles FOR UPDATE USING (true);
-CREATE POLICY "Enable delete for all users" ON articles FOR DELETE USING (true);
-
-CREATE POLICY "Enable read access for all users" ON settings FOR SELECT USING (true);
-CREATE POLICY "Enable insert for all users" ON settings FOR INSERT WITH CHECK (true);
-CREATE POLICY "Enable update for all users" ON settings FOR UPDATE USING (true);
-CREATE POLICY "Enable delete for all users" ON settings FOR DELETE USING (true);
-
--- Insert default settings
-INSERT INTO settings (key, value, description) VALUES 
-('site_name', 'Happy Art Town', 'Name of the website'),
-('site_description', 'Where creativity comes alive! Join thousands of young artists learning to draw, paint, and create amazing art!', 'Website description'),
-('contact_email', 'admin@happyarttown.com', 'Contact email for the site'),
-('max_courses_per_user', '10', 'Maximum courses a user can create');
-
--- Storage bucket setup (run in Supabase Dashboard SQL Editor)
--- Create storage bucket for images
-INSERT INTO storage.buckets (id, name, public) VALUES ('images', 'images', true);
-
--- Create storage policies
-CREATE POLICY "Public Access" ON storage.objects FOR SELECT USING (bucket_id = 'images');
-CREATE POLICY "Authenticated users can upload images" ON storage.objects FOR INSERT WITH CHECK (bucket_id = 'images' AND auth.role() = 'authenticated');
-CREATE POLICY "Users can update own images" ON storage.objects FOR UPDATE USING (bucket_id = 'images' AND auth.role() = 'authenticated');
-CREATE POLICY "Users can delete own images" ON storage.objects FOR DELETE USING (bucket_id = 'images' AND auth.role() = 'authenticated');`}
-                </pre>
-                <motion.button
-                  onClick={() => {
-                    navigator.clipboard.writeText(`-- Create courses table (updated with image_url)
-CREATE TABLE courses (
-  id SERIAL PRIMARY KEY,
-  title VARCHAR(255) NOT NULL,
-  description TEXT,
-  age_group VARCHAR(10),
-  image_emoji VARCHAR(10),
-  image_url TEXT,
-  duration VARCHAR(50),
-  lessons INTEGER DEFAULT 0,
-  difficulty VARCHAR(50),
-  is_published BOOLEAN DEFAULT false,
-  created_at TIMESTAMP DEFAULT NOW(),
-  updated_at TIMESTAMP DEFAULT NOW()
-);
-
--- Create articles table (updated with image_url)
-CREATE TABLE articles (
-  id SERIAL PRIMARY KEY,
-  title VARCHAR(255) NOT NULL,
-  excerpt TEXT,
-  content TEXT,
-  category VARCHAR(50),
-  image_emoji VARCHAR(10),
-  image_url TEXT,
-  read_time VARCHAR(50),
-  is_published BOOLEAN DEFAULT false,
-  created_at TIMESTAMP DEFAULT NOW(),
-  updated_at TIMESTAMP DEFAULT NOW()
-);
-
--- Create settings table
-CREATE TABLE settings (
-  id SERIAL PRIMARY KEY,
-  key VARCHAR(255) UNIQUE NOT NULL,
-  value TEXT,
-  description TEXT,
-  created_at TIMESTAMP DEFAULT NOW(),
-  updated_at TIMESTAMP DEFAULT NOW()
-);
-
--- Enable Row Level Security (RLS)
-ALTER TABLE courses ENABLE ROW LEVEL SECURITY;
-ALTER TABLE articles ENABLE ROW LEVEL SECURITY;
-ALTER TABLE settings ENABLE ROW LEVEL SECURITY;
-
--- Create policies (adjust as needed for your security requirements)
-CREATE POLICY "Enable read access for all users" ON courses FOR SELECT USING (true);
-CREATE POLICY "Enable insert for all users" ON courses FOR INSERT WITH CHECK (true);
-CREATE POLICY "Enable update for all users" ON courses FOR UPDATE USING (true);
-CREATE POLICY "Enable delete for all users" ON courses FOR DELETE USING (true);
-
-CREATE POLICY "Enable read access for all users" ON articles FOR SELECT USING (true);
-CREATE POLICY "Enable insert for all users" ON articles FOR INSERT WITH CHECK (true);
-CREATE POLICY "Enable update for all users" ON articles FOR UPDATE USING (true);
-CREATE POLICY "Enable delete for all users" ON articles FOR DELETE USING (true);
-
-CREATE POLICY "Enable read access for all users" ON settings FOR SELECT USING (true);
-CREATE POLICY "Enable insert for all users" ON settings FOR INSERT WITH CHECK (true);
-CREATE POLICY "Enable update for all users" ON settings FOR UPDATE USING (true);
-CREATE POLICY "Enable delete for all users" ON settings FOR DELETE USING (true);
-
--- Insert default settings
-INSERT INTO settings (key, value, description) VALUES 
-('site_name', 'Happy Art Town', 'Name of the website'),
-('site_description', 'Where creativity comes alive! Join thousands of young artists learning to draw, paint, and create amazing art!', 'Website description'),
-('contact_email', 'admin@happyarttown.com', 'Contact email for the site'),
-('max_courses_per_user', '10', 'Maximum courses a user can create');
-
--- Storage bucket setup (run in Supabase Dashboard SQL Editor)
--- Create storage bucket for images
-INSERT INTO storage.buckets (id, name, public) VALUES ('images', 'images', true);
-
--- Create storage policies
-CREATE POLICY "Public Access" ON storage.objects FOR SELECT USING (bucket_id = 'images');
-CREATE POLICY "Authenticated users can upload images" ON storage.objects FOR INSERT WITH CHECK (bucket_id = 'images' AND auth.role() = 'authenticated');
-CREATE POLICY "Users can update own images" ON storage.objects FOR UPDATE USING (bucket_id = 'images' AND auth.role() = 'authenticated');
-CREATE POLICY "Users can delete own images" ON storage.objects FOR DELETE USING (bucket_id = 'images' AND auth.role() = 'authenticated');`);
-                    showNotification('SQL copied to clipboard!');
-                  }}
-                  className="absolute top-2 right-2 p-2 bg-green-600 text-white rounded text-xs hover:bg-green-700"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  Copy SQL
-                </motion.button>
-              </div>
-            </div>
-          </div>
-        </motion.div>
-      </motion.div>
-    )
-  };
-
   // Main render function
   const renderActiveSection = () => {
-    switch (activeTab) {
-      case 'dashboard':
-        return <Dashboard />;
+    if (activeSection === 'articles' && selectedArticle) {
+      return <ArticleDetailPage />;
+    }
+    
+    if (activeSection === 'courses' && selectedCourse) {
+      return <CourseDetailPage />;
+    }
+    
+    switch (activeSection) {
+      case 'home':
+        return <HomePage />;
       case 'courses':
-        return <CoursesList />;
+        return <CoursesPage />;
       case 'articles':
-        return <ArticlesList />;
-      case 'settings':
-        return <Settings />;
+        return <ArticlesPage />;
       default:
-        return <Dashboard />;
+        return <HomePage />;
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Sidebar />
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
+      <Navigation />
       
-      <div className="ml-64">
-        <Header />
-        
-        <main className="p-6 relative z-0">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={activeTab}
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.3 }}
-              className="relative z-0"
-            >
-              {renderActiveSection()}
-            </motion.div>
-          </AnimatePresence>
-        </main>
-      </div>
-
-      <AnimatePresence>
-        {showForm && (
-          <>
-            {activeTab === 'courses' && (
-              <CourseForm
-                course={editingItem}
-                onSave={handleSave}
-                onCancel={() => {
-                  setShowForm(false);
-                  setEditingItem(null);
-                }}
-              />
-            )}
-            {activeTab === 'articles' && (
-              <ArticleForm
-                article={editingItem}
-                onSave={handleSave}
-                onCancel={() => {
-                  setShowForm(false);
-                  setEditingItem(null);
-                }}
-              />
-            )}
-          </>
-        )}
-      </AnimatePresence>
-
-      <AnimatePresence>
-        <Notification />
-      </AnimatePresence>
-
-      {(loading || settingsLoading) && (
-        <motion.div
-          className="fixed inset-0 bg-black bg-opacity-20 flex items-center justify-center z-50"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-        >
-          <div className="bg-white p-6 rounded-lg shadow-lg flex items-center space-x-3">
-            <RefreshCw className="animate-spin text-purple-500" size={24} />
-            <span className="text-gray-700">
-              {usingMockData ? 'Using mock data...' : 'Loading from database...'}
-            </span>
+      <main className="max-w-6xl mx-auto px-4 py-8">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeSection + (selectedArticle ? `-article-${selectedArticle.id}` : '') + (selectedCourse ? `-course-${selectedCourse.id}` : '')}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ duration: 0.3 }}
+          >
+            {renderActiveSection()}
+          </motion.div>
+        </AnimatePresence>
+      </main>
+      
+      {/* Footer */}
+      <motion.footer 
+        className="bg-gray-800 text-white py-8 mt-16"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 1 }}
+      >
+        <div className="max-w-6xl mx-auto px-4 text-center">
+          <div className="flex items-center justify-center space-x-2 mb-4">
+            <div className="text-3xl">🎨</div>
+            <h3 className="text-2xl font-bold">{settings.site_name || 'Happy Art Town'}</h3>
           </div>
-        </motion.div>
-      )}
+          <p className="text-gray-400 mb-4">
+            {settings.site_description || 'Inspiring creativity in young artists around the world'}
+          </p>
+          <div className="flex items-center justify-center space-x-6 text-sm text-gray-400">
+            <span>© 2024 {settings.site_name || 'Happy Art Town'}</span>
+            <span>•</span>
+            <span>Made with ❤️ for kids</span>
+            <span>•</span>
+            <span>Data: {error ? 'Mock' : 'Live from Supabase'}</span>
+            {settings.contact_email && (
+              <>
+                <span>•</span>
+                <span>Contact: {settings.contact_email}</span>
+              </>
+            )}
+          </div>
+        </div>
+      </motion.footer>
     </div>
   );
 };
 
-export default AdminTool;
+export default HappyArtTown;
