@@ -1179,10 +1179,7 @@ const HappyArtTown = () => {
                   className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all border-2 border-transparent hover:border-green-200 flex flex-col h-full"
                   variants={fadeInUp}
                   whileHover={{ y: -5 }}
-                  onClick={() => {
-                    setActiveSection('articles');
-                    setSelectedArticle(article);
-                  }}
+                  onClick={() => setSelectedArticle(article)}
                 >
                   {/* Article Image */}
                   <div className="w-full h-48 mb-4 flex items-center justify-center bg-gradient-to-br from-green-50 to-blue-50 rounded-t-2xl">
@@ -1227,7 +1224,6 @@ const HappyArtTown = () => {
                       whileTap={{ scale: 0.98 }}
                       onClick={(e) => {
                         e.stopPropagation();
-                        setActiveSection('articles');
                         setSelectedArticle(article);
                       }}
                     >
@@ -1312,10 +1308,7 @@ const HappyArtTown = () => {
                     className="w-full bg-gradient-to-r from-purple-400 to-pink-400 text-white py-3 rounded-xl font-medium mt-auto"
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    onClick={() => {
-                      setActiveSection('courses');
-                      setSelectedCourse(course);
-                    }}
+                    onClick={() => setSelectedCourse(course)}
                   >
                     View Course
                   </motion.button>
